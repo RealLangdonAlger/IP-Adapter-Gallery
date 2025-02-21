@@ -351,3 +351,23 @@ button:hover {
   height: 256px;
   margin: 0 auto;
 }
+
+/* Delete Gallery Button */
+.delete-gallery {
+  margin-top: 5px;
+  text-align: center;
+}
+#deleteBaseButton {
+  padding: 8px 20px;
+  width: 100%;
+  font-size: 16px;
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+#deleteBaseButton:hover {
+  background-color: #c0392b;
+}

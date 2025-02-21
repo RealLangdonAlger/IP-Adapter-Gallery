@@ -338,6 +338,103 @@ app.delete("/delete/:baseId/:id", async (req, res) => {
   }
 });
 
+// DELETE /deleteGallery/:baseId – delete an entire base gallery
+app.delete("/deleteGallery/:baseId", async (req, res) => {
+  const baseId = req.params.baseId;
+  console.log(`[DEBUG] DELETE /deleteGallery/${baseId} called.`);
+  try {
+    // Get directories for base images, gallery, and compressed images
+    const { imagesDir, captionsDir } = getGalleryDirs(baseId);
+    const compDir = getCompressedDir(baseId);
+
+    // Delete the base image file
+    const baseImagePath = path.join(baseImagesDir, `${baseId}.png`);
+    if (fs.existsSync(baseImagePath)) {
+      await fsPromises.unlink(baseImagePath);
+      console.log(`[DEBUG] Deleted base image: ${baseImagePath}`);
+    }
+
+    // Delete all gallery entries (images and captions)
+    const imageFiles = await fsPromises.readdir(imagesDir);
+    imageFiles.forEach(async (file) => {
+      const match = file.match(/^(\d+)\.\w+$/);
+      if (match) {
+        const refId = match[1];
+        await deleteGalleryEntry(baseId, refId);
+      }
+    });
+
+    // Delete the gallery directories themselves
+    await fsPromises.rmdir(imagesDir, { recursive: true });
+    await fsPromises.rmdir(captionsDir, { recursive: true });
+    await fsPromises.rmdir(compDir, { recursive: true });
+    console.log(`[DEBUG] Deleted gallery directories for base ${baseId}`);
+
+    res.json({ message: `Gallery for base ${baseId} deleted successfully.` });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete the gallery" });
+  }
+});
+
+// Helper function to delete all files associated with a specific gallery entry
+async function deleteGalleryEntry(baseId, refId) {
+  try {
+    const { imagesDir, captionsDir } = getGalleryDirs(baseId);
+    const compDir = getCompressedDir(baseId);
+
+    // Delete IPA file
+    const ipaFilePath = path.join(imagesDir, `${refId}.png`);
+    await fsPromises.unlink(ipaFilePath);
+    console.log(`[DEBUG] Deleted IPA file: ${ipaFilePath}`);
+
+    // Delete Style, Comp, Both files
+    const filesToDelete = [
+      `${refId}-style.png`,
+      `${refId}-comp.png`,
+      `${refId}-both.png`
+    ];
+    filesToDelete.forEach(async (fileName) => {
+      const filePath = path.join(imagesDir, fileName);
+      try {
+        await fsPromises.unlink(filePath);
+        console.log(`[DEBUG] Deleted file: ${filePath}`);
+      } catch (e) {
+        console.log(`[DEBUG] File not found: ${filePath}`);
+      }
+    });
+
+    // Delete compressed images
+    const compressedFiles = [
+      `${refId}-ipa.png`,
+      `${refId}-style.jpg`,
+      `${refId}-comp.jpg`,
+      `${refId}-both.jpg`
+    ];
+    compressedFiles.forEach(async (fileName) => {
+      const filePath = path.join(compDir, fileName);
+      try {
+        await fsPromises.unlink(filePath);
+        console.log(`[DEBUG] Deleted compressed file: ${filePath}`);
+      } catch (e) {
+        console.log(`[DEBUG] Compressed file not found: ${filePath}`);
+      }
+    });
+
+    // Delete caption file
+    const captionFilePath = path.join(captionsDir, `${refId}.txt`);
+    try {
+      await fsPromises.unlink(captionFilePath);
+      console.log(`[DEBUG] Deleted caption file: ${captionFilePath}`);
+    } catch (e) {
+      console.log(`[DEBUG] Caption file not found: ${captionFilePath}`);
+    }
+  } catch (err) {
+    console.error(`[DEBUG] Failed to delete gallery entry ${refId}: ${err}`);
+  }
+}
+
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });

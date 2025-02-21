@@ -55,6 +55,31 @@ async function loadBaseImages() {
   }
 }
 
+// Function to handle the deletion of a base gallery
+document.getElementById("deleteBaseButton").addEventListener("click", async function () {
+  if (confirm("Are you sure you want to delete this base gallery? This will delete every entry (images and captions) associated with it.")) {
+    try {
+      // Send DELETE request to server to delete the selected base gallery
+      const response = await fetch(`/deleteGallery/${selectedBase}`, { method: "DELETE" });
+      const result = await response.json();
+      if (response.ok) {
+        alert("Gallery deleted successfully!");
+        // Reset to the default state if deletion was successful
+        selectedBase = "";
+        document.getElementById("floatingBaseImage").src = "";
+        document.getElementById("floatingBaseTitle").textContent = "No Base Available";
+        document.getElementById("gallery").innerHTML = "";
+        loadBaseImages();  // Refresh the base image selector
+      } else {
+        alert("Failed to delete gallery: " + result.error);
+      }
+    } catch (err) {
+      alert("An error occurred while deleting the gallery.");
+      console.error("Delete gallery error:", err);
+    }
+  }
+});
+
 // Close base upload modal logic
 document.getElementById("baseUploadModal").addEventListener("click", function (e) {
   if (e.target === this) {

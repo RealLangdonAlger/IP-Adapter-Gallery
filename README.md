@@ -56,38 +56,42 @@ Populating the gallery is done manually for now.
    Each gallery entry includes a delete button. Upon confirmation, the entry is removed immediately from the view.
 
 ## Setup
+**Requires [node.js](https://nodejs.org/)**
+
+Recommended to just launch the **run.bat** file to install all requirements, start the server and open the page in a browser.
+
+Alternatively:
 
 1. **Install Dependencies:**
 
-  ```bash
-  npm install express multer sharp
-  ```
+    ```bash
+    npm install express multer sharp
+    ```
 
 2. **Folder Structure:**
-  Folder Structure:
-  Ensure the following folder structure exists (the server will auto-create missing folders):
-
-  ```bash
-  public/
-  ├── base_images/             # Base generation images (e.g. base1.png, base2.png, …)
-  ├── galleries/
-  │   ├── base1/
-  │   │    ├── images/         # IPA, Style, Comp, Both images for base1
-  │   │    └── captions/       # Captions for base1 entries
-  │   └── base2/
-  │        ├── images/
-  │        └── captions/
-  ├── images_compressed/       # Compressed images in subfolders per base (e.g. base1, base2)
-  └── (other static assets)
-  ```
+    Folder Structure:
+    Ensure the following folder structure exists (the server will auto-create missing folders):
+  
+    ```bash
+    public/
+    ├── base_images/             # Base generation images (e.g. base1.png, base2.png, …)
+    ├── galleries/
+    │   ├── base1/
+    │   │    ├── images/         # IPA, Style, Comp, Both images for base1
+    │   │    └── captions/       # Captions for base1 entries
+    │   └── base2/
+    │        ├── images/
+    │        └── captions/
+    ├── images_compressed/       # Compressed images in subfolders per base (e.g. base1, base2)
+    └── (other static assets)
+    ```
 
 3. **Run:**
-  ```bash
-  node server.js
-  ```
+    ```bash
+    node server.js
+    ```
 
-Then open your browser to http://localhost:3000.
-Alternatively, use **run.bat** to start the server and automatically open the page in a browser.
+  Then open your browser to http://localhost:3000.
 
 ## Thanks to ChatGPT for the assistance! 🎉
 

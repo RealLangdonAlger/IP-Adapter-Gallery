@@ -9,24 +9,30 @@
   <body>
     <header>
       <h1>IP Adapter Gallery</h1>
+      <!-- Removed the old base selector from header -->
       <button class="open-upload-modal" title="Upload New Entry">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z" />
         </svg>
       </button>
     </header>
-	
-	<div class="floating-base-image">
-	  <div class="floating-base-image-header" onclick="toggleFloatingBaseImage()">
-		<span>Base Generation</span>
-		<button class="toggle-button" type="button">Show</button>
-	  </div>
-	  <div class="floating-base-image-content">
-		<img src="/images/000-base.png" alt="Base Generation" class="base-image">
-	  </div>
-	</div>
 
-
+    <!-- Floating Base Image Container with internal base selector -->
+    <div class="floating-base-image">
+      <div class="floating-base-image-header" onclick="toggleFloatingBaseImage()">
+        <span id="floatingBaseTitle">Base Generation</span>
+        <button class="toggle-button" type="button">Show</button>
+      </div>
+      <div class="floating-base-image-content">
+        <img id="floatingBaseImage" src="" alt="Base Generation" class="base-image" />
+        <div class="base-selector" id="baseSelector">
+          <!-- Thumbnails for each base will be injected here -->
+        </div>
+        <div class="new-base">
+          <button id="newBaseButton">Add New Base</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Fullscreen Upload Modal -->
     <div id="uploadModal" class="upload-modal">
@@ -70,6 +76,23 @@
         <div id="uploadStatus"></div>
       </div>
     </div>
+
+    <!-- Modal for creating a new base gallery -->
+	<div id="baseUploadModal" class="upload-modal">
+	  <div class="upload-modal-content">
+		<h2>Create New Base Gallery</h2>
+		<form id="baseUploadForm">
+		  <div class="upload-item" id="base-dropzone">
+			<label>Base Image</label>
+			<input type="file" id="baseImage" name="baseImage" accept="image/*" required />
+			<img class="preview" alt="Preview" />
+		  </div>
+		  <br />
+		  <button type="submit">Create Base Gallery</button>
+		</form>
+		<div id="baseUploadStatus"></div>
+	  </div>
+	</div>
 
     <div class="gallery" id="gallery"></div>
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">

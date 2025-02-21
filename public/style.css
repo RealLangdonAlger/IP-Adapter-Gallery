@@ -7,18 +7,34 @@ body {
   margin: 0;
   padding: 20px;
 }
-h1,
-h2 {
+h1, h2 {
   color: #ffffff;
 }
 
-/* Header & Upload Button */
+/* Header & Controls */
 header {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
   position: relative;
+}
+#baseSelect {
+  padding: 5px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background-color: #2e2e2e;
+  color: #fff;
+}
+#newBaseButton {
+  padding: 5px 10px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background-color: #2e2e2e;
+  color: #fff;
+  cursor: pointer;
 }
 .open-upload-modal {
   background: transparent;
@@ -237,7 +253,7 @@ button:hover {
   position: fixed;
   top: 10px;
   left: 10px;
-  width: 300px; /* adjust as needed */
+  width: 300px;
   background: rgba(0, 0, 0, 0.9);
   border: 1px solid #555;
   border-radius: 8px;
@@ -246,7 +262,6 @@ button:hover {
   overflow: hidden;
   font-family: Arial, sans-serif;
 }
-
 .floating-base-image-header {
   display: flex;
   justify-content: space-between;
@@ -255,12 +270,10 @@ button:hover {
   padding: 5px 10px;
   color: #fff;
 }
-
 .floating-base-image-header span {
   font-size: 16px;
   font-weight: bold;
 }
-
 .toggle-button {
   background: transparent;
   border: none;
@@ -268,24 +281,71 @@ button:hover {
   font-size: 14px;
   cursor: pointer;
 }
-
 .floating-base-image-content {
   display: none;
   padding: 10px;
   text-align: center;
 }
+.floating-base-image.expanded .floating-base-image-content {
+  display: block;
+}
+.floating-base-image.expanded .toggle-button {
+  color: #f00;
+}
+.base-image {
+  width: 100%;
+  max-width: 280px;
+  border: 2px solid #555;
+  border-radius: 8px;
+}
 
+/* Base Selector inside Floating Base Image */
+.floating-base-image-content {
+  display: none;
+  padding: 10px;
+  text-align: center;
+}
 .floating-base-image.expanded .floating-base-image-content {
   display: block;
 }
 
-.floating-base-image.expanded .toggle-button {
-  color: #f00;
+/* Style for base thumbnails row */
+.base-selector {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+.base-thumb {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border: 2px solid #555;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.base-thumb:hover {
+  transform: scale(1.1);
+  border-color: #0f0;
 }
 
-.base-image {
-  width: 100%;
-  max-width: 280px; /* slightly less than container width */
-  border: 2px solid #555;
-  border-radius: 8px;
+/* Style for the "Add New Base" button inside floating container */
+.new-base {
+  margin-top: 10px;
+}
+#newBaseButton {
+  padding: 5px 10px;
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background-color: #2e2e2e;
+  color: #fff;
+  cursor: pointer;
+}
+#base-dropzone {
+  width: 256px;
+  height: 256px;
+  margin: 0 auto;
 }

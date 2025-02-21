@@ -8,36 +8,110 @@ const app = express();
 const PORT = 3000;
 const fsPromises = fs.promises;
 
-// Directories for originals, captions, and compressed images
-const imagesDir = path.join(__dirname, "public", "images");
-const captionsDir = path.join(__dirname, "public", "captions");
+// Directories for base galleries, base images, and compressed images
+const galleriesDir = path.join(__dirname, "public", "galleries");
+const baseImagesDir = path.join(__dirname, "public", "base_images");
 const imagesCompressedDir = path.join(__dirname, "public", "images_compressed");
 
-// Ensure necessary directories exist
+// Ensure a directory exists
 function ensureDir(dirPath) {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
   }
 }
-ensureDir(imagesDir);
-ensureDir(captionsDir);
+ensureDir(galleriesDir);
+ensureDir(baseImagesDir);
 ensureDir(imagesCompressedDir);
 
-// Use memory storage for multer; we'll write files asynchronously on upload
+// Get directories for a given base gallery
+function getGalleryDirs(baseId) {
+  const baseGalleryDir = path.join(galleriesDir, baseId);
+  const imagesDir = path.join(baseGalleryDir, "images");
+  const captionsDir = path.join(baseGalleryDir, "captions");
+  ensureDir(baseGalleryDir);
+  ensureDir(imagesDir);
+  ensureDir(captionsDir);
+  return { imagesDir, captionsDir };
+}
+
+// Get compressed images directory for a given base
+function getCompressedDir(baseId) {
+  const baseCompressedDir = path.join(imagesCompressedDir, baseId);
+  ensureDir(baseCompressedDir);
+  return baseCompressedDir;
+}
+
+// Use memory storage for multer uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Serve static files from the "public" directory
+// Serve static files from "public"
 app.use(express.static("public"));
 
-// GET /references – paginated endpoint
-app.get("/references", async (req, res) => {
-  console.log(`[DEBUG] GET /references called. Query: ${JSON.stringify(req.query)}`);
+/* ===== New Endpoints for Base Galleries ===== */
+
+// GET /baseImages – auto-detect all base images
+app.get("/baseImages", async (req, res) => {
   try {
+    const files = await fsPromises.readdir(baseImagesDir);
+    const baseList = files
+      .filter(file => /\.(png|jpe?g)$/i.test(file))
+      .map(file => {
+        const baseId = file.split(".")[0]; // e.g. "base1"
+        return { baseId, url: `/base_images/${file}` };
+      });
+    res.json(baseList);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Unable to read base images" });
+  }
+});
+
+// POST /uploadBase – create a new base gallery by uploading a base image
+app.post("/uploadBase", upload.single("baseImage"), async (req, res) => {
+  try {
+    if (!req.file || !req.file.mimetype.startsWith("image/")) {
+      return res.status(400).json({ error: "Invalid file or no file provided" });
+    }
+    // Determine new base id by scanning baseImagesDir for names like base<number>.png
+    const files = await fsPromises.readdir(baseImagesDir);
+    let maxNum = 0;
+    files.forEach(file => {
+      const match = file.match(/^base(\d+)\./);
+      if (match) {
+        const num = parseInt(match[1], 10);
+        if (num > maxNum) maxNum = num;
+      }
+    });
+    const newBaseNum = maxNum + 1;
+    const newBaseId = `base${newBaseNum}`;
+    const newBasePath = path.join(baseImagesDir, `${newBaseId}.png`);
+    // Convert uploaded base image to PNG and save it
+    await sharp(req.file.buffer).png().toFile(newBasePath);
+    // Create empty gallery folders for the new base
+    getGalleryDirs(newBaseId);
+    getCompressedDir(newBaseId);
+    console.log(`[DEBUG] New base gallery created: ${newBaseId}`);
+    res.json({ message: "Base gallery created", baseId: newBaseId, url: `/base_images/${newBaseId}.png` });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Base gallery creation failed" });
+  }
+});
+
+/* ===== Existing Gallery Endpoints (now parameterized by baseId) ===== */
+
+// GET /references/:baseId – paginated gallery entries for a base
+app.get("/references/:baseId", async (req, res) => {
+  const baseId = req.params.baseId;
+  console.log(`[DEBUG] GET /references/${baseId} called. Query: ${JSON.stringify(req.query)}`);
+  try {
+    const { imagesDir } = getGalleryDirs(baseId);
     const offset = parseInt(req.query.offset) || 0;
     const limit = parseInt(req.query.limit) || 20;
     const files = await fsPromises.readdir(imagesDir);
     const references = [];
+    // Assume IPA images are stored as <refId>.<ext>
     files.forEach(file => {
       const match = file.match(/^(\d+)\.\w+$/);
       if (match && !references.includes(match[1])) {
@@ -49,13 +123,15 @@ app.get("/references", async (req, res) => {
     res.json({ references: paginated, total: references.length });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Unable to read images directory" });
+    res.status(500).json({ error: "Unable to read gallery images" });
   }
 });
 
-// GET /captions/:id – asynchronously read caption file
-app.get("/captions/:id", async (req, res) => {
-  console.log(`[DEBUG] GET /captions/${req.params.id} called.`);
+// GET /captions/:baseId/:id – get caption for a gallery entry
+app.get("/captions/:baseId/:id", async (req, res) => {
+  const baseId = req.params.baseId;
+  console.log(`[DEBUG] GET /captions/${baseId}/${req.params.id} called.`);
+  const { captionsDir } = getGalleryDirs(baseId);
   const captionPath = path.join(captionsDir, `${req.params.id}.txt`);
   try {
     await fsPromises.access(captionPath);
@@ -66,39 +142,34 @@ app.get("/captions/:id", async (req, res) => {
   }
 });
 
-// Helper to find the IPA file for a given reference ID (stored as <refId>.<ext>)
-async function findRefImage(refNumber) {
-  try {
-    const files = await fsPromises.readdir(imagesDir);
-    for (const file of files) {
-      if (file.startsWith(`${refNumber}.`)) {
-        return file;
-      }
+// Helper to find the IPA image for a given reference in a base gallery
+async function findRefImage(baseId, refNumber) {
+  const { imagesDir } = getGalleryDirs(baseId);
+  const files = await fsPromises.readdir(imagesDir);
+  for (const file of files) {
+    if (file.startsWith(`${refNumber}.`)) {
+      return file;
     }
-    return null;
-  } catch (err) {
-    throw err;
   }
+  return null;
 }
 
-// GET /get-image/:refNumber/:type – dynamically serve images.
-// • For type "ipa": returns a processed 512x512 version (resize shortest edge to 512 and center crop).
-// • For types "style", "comp", or "both": checks for a downscaled version in images_compressed,
-//   and if not found, processes the original image (from images/<refNumber>-type.png),
-//   saves the downscaled version, then serves it.
-app.get("/get-image/:refNumber/:type", async (req, res) => {
-  const refNumber = req.params.refNumber;
-  const type = req.params.type; // expected: "ipa", "style", "comp", or "both"
-  console.log(`[DEBUG] GET /get-image/${refNumber}/${type} called.`);
+// GET /get-image/:baseId/:refNumber/:type – dynamically serve images
+// For type "ipa": resize so that shortest edge becomes 512 and center crop to 512×512
+// For "style", "comp", "both": if not compressed, downscale original by 50%
+app.get("/get-image/:baseId/:refNumber/:type", async (req, res) => {
+  const { baseId, refNumber, type } = req.params;
+  console.log(`[DEBUG] GET /get-image/${baseId}/${refNumber}/${type} called.`);
   try {
+    const { imagesDir } = getGalleryDirs(baseId);
+    const compDir = getCompressedDir(baseId);
     if (type === "ipa") {
-      // Process IPA image: resize so that shortest edge is 512 and center crop to 512x512
       const processedFileName = `${refNumber}-ipa.png`;
-      const processedPath = path.join(imagesCompressedDir, processedFileName);
+      const processedPath = path.join(compDir, processedFileName);
       if (fs.existsSync(processedPath)) {
         return res.sendFile(processedPath);
       } else {
-        const ipaFile = await findRefImage(refNumber);
+        const ipaFile = await findRefImage(baseId, refNumber);
         if (!ipaFile) {
           return res.status(404).json({ error: "IPA image not found" });
         }
@@ -112,17 +183,15 @@ app.get("/get-image/:refNumber/:type", async (req, res) => {
       }
     } else if (["style", "comp", "both"].includes(type)) {
       const compressedFileName = `${refNumber}-${type}.jpg`;
-      const compressedPath = path.join(imagesCompressedDir, compressedFileName);
+      const compressedPath = path.join(compDir, compressedFileName);
       if (fs.existsSync(compressedPath)) {
         return res.sendFile(compressedPath);
       } else {
-        // Process the original image (expected at images/<refNumber>-type.png)
         const originalFileName = `${refNumber}-${type}.png`;
         const originalPath = path.join(imagesDir, originalFileName);
         if (!fs.existsSync(originalPath)) {
           return res.status(404).json({ error: "Original image not found" });
         }
-        // Downscale by 50% (or adjust as needed)
         const image = sharp(originalPath);
         const metadata = await image.metadata();
         const newWidth = Math.round(metadata.width * 0.5);
@@ -140,11 +209,9 @@ app.get("/get-image/:refNumber/:type", async (req, res) => {
   }
 });
 
-// POST /upload – handle new entry uploads asynchronously.
-// Saves IPA image and stores originals for style, comp, and both.
-// (These originals remain untouched; on-demand processing is performed when requested.)
+// POST /upload/:baseId – handle new gallery entry uploads for a base
 app.post(
-  "/upload",
+  "/upload/:baseId",
   upload.fields([
     { name: "ipa", maxCount: 1 },
     { name: "style", maxCount: 1 },
@@ -152,13 +219,15 @@ app.post(
     { name: "both", maxCount: 1 }
   ]),
   async (req, res) => {
-    console.log(`[DEBUG] POST /upload called. Files: ${Object.keys(req.files).join(", ")}; Body: ${JSON.stringify(req.body)}`);
+    const baseId = req.params.baseId;
+    console.log(`[DEBUG] POST /upload/${baseId} called. Files: ${Object.keys(req.files).join(", ")}; Body: ${JSON.stringify(req.body)}`);
     try {
-      // Determine new reference ID by scanning the images directory
+      const { imagesDir } = getGalleryDirs(baseId);
+      // Determine new reference ID by scanning gallery images (IPA files)
       const files = await fsPromises.readdir(imagesDir);
       let maxId = 0;
       files.forEach(file => {
-        const match = file.match(/^(\d+)\./);
+        const match = file.match(/^(\d+)\.\w+$/);
         if (match) {
           const num = parseInt(match[1], 10);
           if (num > maxId) maxId = num;
@@ -166,20 +235,20 @@ app.post(
       });
       const newId = maxId + 1;
 
-      // Save IPA image (original is saved; on-demand processing will occur upon request)
+      // Save IPA image (original stored; processing is on demand)
       if (req.files.ipa && req.files.ipa[0]) {
         const ipaFile = req.files.ipa[0];
         if (!ipaFile.mimetype.startsWith("image/")) {
-          return res.status(400).json({ error: "Invalid file type for IP-A image." });
+          return res.status(400).json({ error: "Invalid file type for IPA image." });
         }
         const ext = path.extname(ipaFile.originalname) || ".jpg";
         const ipaFilename = `${newId}${ext}`;
         await fsPromises.writeFile(path.join(imagesDir, ipaFilename), ipaFile.buffer);
       } else {
-        return res.status(400).json({ error: "IP-A reference image is required." });
+        return res.status(400).json({ error: "IPA reference image is required." });
       }
 
-      // Save originals for style, comp, and both (compression is done on-demand)
+      // Save originals for style, comp, and both
       async function saveOriginal(file, suffix) {
         if (!file.mimetype.startsWith("image/")) {
           throw new Error(`Invalid file type for ${suffix} image.`);
@@ -203,11 +272,12 @@ app.post(
         return res.status(400).json({ error: "Both image is required." });
       }
 
-      // Save caption to the captions directory
+      // Save caption
+      const { captionsDir } = getGalleryDirs(baseId);
       const captionText = req.body.caption || "";
       await fsPromises.writeFile(path.join(captionsDir, `${newId}.txt`), captionText);
 
-      console.log(`[DEBUG] Upload successful. New entry id: ${newId}`);
+      console.log(`[DEBUG] Upload successful. New entry id: ${newId} in base ${baseId}`);
       res.json({ message: "Upload successful", id: newId });
     } catch (err) {
       console.error(err);
@@ -216,20 +286,21 @@ app.post(
   }
 );
 
-// DELETE /delete/:id – asynchronously delete an entry’s files
-app.delete("/delete/:id", async (req, res) => {
-  console.log(`[DEBUG] DELETE /delete/${req.params.id} called.`);
+// DELETE /delete/:baseId/:id – delete an entry from a base gallery
+app.delete("/delete/:baseId/:id", async (req, res) => {
+  const baseId = req.params.baseId;
   const refId = req.params.id;
+  console.log(`[DEBUG] DELETE /delete/${baseId}/${refId} called.`);
   try {
-    const ipaFileName = await findRefImage(refId);
+    const { imagesDir, captionsDir } = getGalleryDirs(baseId);
+    const compDir = getCompressedDir(baseId);
+    const ipaFileName = await findRefImage(baseId, refId);
     if (!ipaFileName) {
       return res.status(404).json({ error: "Entry not found" });
     }
-    // Delete IPA file
     await fsPromises.unlink(path.join(imagesDir, ipaFileName));
     console.log(`[DEBUG] Deleted IPA file: ${ipaFileName}`);
 
-    // Delete originals for style, comp, and both (if they exist)
     const originals = [
       `${refId}-style.png`,
       `${refId}-comp.png`,
@@ -240,11 +311,8 @@ app.delete("/delete/:id", async (req, res) => {
       try {
         await fsPromises.unlink(filePath);
         console.log(`[DEBUG] Deleted original file: ${fileName}`);
-      } catch (e) {
-        // Ignore if file doesn't exist
-      }
+      } catch (e) {}
     }
-    // Delete any compressed images if they exist
     const compressedFiles = [
       `${refId}-ipa.png`,
       `${refId}-style.jpg`,
@@ -252,23 +320,17 @@ app.delete("/delete/:id", async (req, res) => {
       `${refId}-both.jpg`
     ];
     for (const fileName of compressedFiles) {
-      const filePath = path.join(imagesCompressedDir, fileName);
+      const filePath = path.join(compDir, fileName);
       try {
         await fsPromises.unlink(filePath);
         console.log(`[DEBUG] Deleted compressed file: ${fileName}`);
-      } catch (e) {
-        // Ignore if file doesn't exist
-      }
+      } catch (e) {}
     }
-    // Delete caption file if it exists
     const captionPath = path.join(captionsDir, `${refId}.txt`);
     try {
       await fsPromises.unlink(captionPath);
       console.log(`[DEBUG] Deleted caption file for entry ${refId}`);
-    } catch (e) {
-      // Ignore if caption file doesn't exist
-    }
-
+    } catch (e) {}
     res.json({ message: "Deletion successful" });
   } catch (err) {
     console.error(err);
@@ -276,7 +338,6 @@ app.delete("/delete/:id", async (req, res) => {
   }
 });
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });

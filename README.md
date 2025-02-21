@@ -36,9 +36,13 @@ Populating the gallery is done manually for now.
    The **IPA** image can be dragged directly into WebUI's ControlNet for ease-of-use. Likewise, the **base** image can also be dragged into WebUI's prompt area to read all its parameters.
 
 3. **Uploading New Gallery Entries:**  
-   Click the upload button (next to the header) to open the upload modal. Drop in your IPA, Style, Composition, and Both (Style & Composition preset) images along with a caption. The new entry is added to the currently selected base gallery.
+   Click the upload button (next to the header) to open the upload modal. Drop in your *IPA*, *Style*, *Composition*, and '*Both*' aka *Style & Composition* images along with a caption.
+
+   The new entry is added to the currently selected base gallery.
 
    ![image](https://github.com/user-attachments/assets/739c1383-c047-4c70-ada3-f12f00e7916b)
+
+   The entries refer to these ControlNet presets: ![image](https://github.com/user-attachments/assets/3709cfe8-ecb1-42a6-89f6-511ec3bdd84b)
 
 
 5. **Creating a New Base Gallery:**  

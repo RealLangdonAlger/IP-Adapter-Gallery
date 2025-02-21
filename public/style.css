@@ -231,3 +231,61 @@ button {
 button:hover {
   background-color: #444;
 }
+
+/* Floating Base Image */
+.floating-base-image {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  width: 300px; /* adjust as needed */
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid #555;
+  border-radius: 8px;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+.floating-base-image-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  padding: 5px 10px;
+  color: #fff;
+}
+
+.floating-base-image-header span {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.toggle-button {
+  background: transparent;
+  border: none;
+  color: #0f0;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.floating-base-image-content {
+  display: none;
+  padding: 10px;
+  text-align: center;
+}
+
+.floating-base-image.expanded .floating-base-image-content {
+  display: block;
+}
+
+.floating-base-image.expanded .toggle-button {
+  color: #f00;
+}
+
+.base-image {
+  width: 100%;
+  max-width: 280px; /* slightly less than container width */
+  border: 2px solid #555;
+  border-radius: 8px;
+}

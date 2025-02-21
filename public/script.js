@@ -1,3 +1,15 @@
+function toggleFloatingBaseImage() {
+  const container = document.querySelector('.floating-base-image');
+  const toggleButton = container.querySelector('.toggle-button');
+  container.classList.toggle('expanded');
+  // Update button text based on state
+  if (container.classList.contains('expanded')) {
+    toggleButton.textContent = 'Hide';
+  } else {
+    toggleButton.textContent = 'Show';
+  }
+}
+
 // Image preview functionality for upload items
 document
   .querySelectorAll('.upload-item input[type="file"]')

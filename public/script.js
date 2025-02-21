@@ -16,9 +16,10 @@ async function loadBaseImages() {
     const floatingBaseImage = document.getElementById("floatingBaseImage");
     const floatingBaseTitle = document.getElementById("floatingBaseTitle");
     const deleteBaseButton = document.getElementById("deleteBaseButton");
+    const uploadButton = document.querySelector(".open-upload-modal");
 
     if (baseList.length === 0) {
-      // No base images available: show only the "Add New Base" thumbnail and hide image and delete button.
+      // No base images available: show only the "Add New Base" thumbnail.
       const addNewThumb = document.createElement("div");
       addNewThumb.classList.add("base-thumb", "new-base-thumb");
       addNewThumb.innerHTML = "<span>+</span>";
@@ -31,14 +32,17 @@ async function loadBaseImages() {
       floatingBaseImage.style.display = "none";
       deleteBaseButton.style.display = "none";
       floatingBaseTitle.textContent = "No Base Available";
+      // Hide the upload new entry button because no base is available.
+      uploadButton.style.display = "none";
       return;
+    } else {
+      // Bases exist: show the upload button.
+      uploadButton.style.display = "block";
+      floatingBaseImage.style.display = "block";
+      deleteBaseButton.style.display = "block";
     }
     
-    // If bases exist, ensure the floating base image and delete button are visible.
-    floatingBaseImage.style.display = "block";
-    deleteBaseButton.style.display = "block";
-
-    // Create thumbnail elements for each base image.
+    // Populate thumbnails for each base image.
     baseList.forEach(base => {
       const thumb = document.createElement("img");
       thumb.src = base.url;
@@ -64,7 +68,7 @@ async function loadBaseImages() {
       document.getElementById("baseUploadModal").style.display = "flex";
     });
     baseSelector.appendChild(addNewThumb);
-
+    
     // If no base was previously selected, select the first one.
     if (!selectedBase) {
       selectedBase = baseList[0].baseId;

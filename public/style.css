@@ -309,14 +309,16 @@ button:hover {
   display: block;
 }
 
-/* Style for base thumbnails row */
+/* Base Selector inside Floating Base Image Container */
 .base-selector {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: 5px;
-  margin-top: 10px;
+  margin-bottom: 10px;
 }
+
+/* Base thumbnail styling */
 .base-thumb {
   width: 60px;
   height: 60px;
@@ -331,19 +333,19 @@ button:hover {
   border-color: #0f0;
 }
 
-/* Style for the "Add New Base" button inside floating container */
-.new-base {
-  margin-top: 10px;
-}
-#newBaseButton {
-  padding: 5px 10px;
-  font-size: 14px;
-  border-radius: 4px;
-  border: 1px solid #555;
+/* New Base thumbnail (Add New Base button) */
+.new-base-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: #2e2e2e;
   color: #fff;
+  font-size: 28px;
+  border: 2px dashed #555;
+  border-radius: 4px;
   cursor: pointer;
 }
+
 #base-dropzone {
   width: 256px;
   height: 256px;

@@ -17,22 +17,21 @@
       </button>
     </header>
 
-    <!-- Floating Base Image Container with internal base selector -->
-    <div class="floating-base-image">
-      <div class="floating-base-image-header" onclick="toggleFloatingBaseImage()">
-        <span id="floatingBaseTitle">Base Generation</span>
-        <button class="toggle-button" type="button">Show</button>
-      </div>
-      <div class="floating-base-image-content">
-        <img id="floatingBaseImage" src="" alt="Base Generation" class="base-image" />
-        <div class="base-selector" id="baseSelector">
-          <!-- Thumbnails for each base will be injected here -->
-        </div>
-        <div class="new-base">
-          <button id="newBaseButton">Add New Base</button>
-        </div>
-      </div>
-    </div>
+    <!-- Floating Base Image Container -->
+	<div class="floating-base-image">
+	  <div class="floating-base-image-header" onclick="toggleFloatingBaseImage()">
+		<span id="floatingBaseTitle">Base Generation</span>
+		<button class="toggle-button" type="button">Show</button>
+	  </div>
+	  <div class="floating-base-image-content">
+		<!-- Base thumbnails appear here at the top -->
+		<div class="base-selector" id="baseSelector">
+		  <!-- Thumbnails (and Add New Base button) will be injected dynamically -->
+		</div>
+		<!-- The currently selected base image appears below the thumbnails -->
+		<img id="floatingBaseImage" src="" alt="Base Generation" class="base-image" />
+	  </div>
+	</div>
 
     <!-- Fullscreen Upload Modal -->
     <div id="uploadModal" class="upload-modal">

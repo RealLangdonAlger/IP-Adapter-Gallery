@@ -18,28 +18,33 @@ async function loadBaseImages() {
       document.getElementById("floatingBaseTitle").textContent = "No Base Available";
       return;
     }
-    // When a base thumbnail is clicked, update the selected base and reset infinite scroll
-	baseList.forEach(base => {
-	  const thumb = document.createElement("img");
-	  thumb.src = base.url;
-	  thumb.alt = base.baseId;
-	  thumb.classList.add("base-thumb");
-	  thumb.dataset.baseId = base.baseId;
-	  thumb.addEventListener("click", () => {
-		// Update selected base
-		selectedBase = base.baseId;
-		document.getElementById("floatingBaseImage").src = base.url;
-		document.getElementById("floatingBaseTitle").textContent = "Base Generation: " + base.baseId;
-		// Reset gallery and infinite scroll state
-		offset = 0;
-		totalReferences = 0;
-		document.getElementById("gallery").innerHTML = "";
-		initObserver(); // Reinitialize observer for new base
-		loadGallery();
-	  });
-	  baseSelector.appendChild(thumb);
-	});
-    // Select the first base if none is selected
+    // Create thumbnail elements for each base
+    baseList.forEach(base => {
+      const thumb = document.createElement("img");
+      thumb.src = base.url;
+      thumb.alt = base.baseId;
+      thumb.classList.add("base-thumb");
+      thumb.dataset.baseId = base.baseId;
+      thumb.addEventListener("click", () => {
+        selectedBase = base.baseId;
+        document.getElementById("floatingBaseImage").src = base.url;
+        document.getElementById("floatingBaseTitle").textContent = "Base Generation: " + base.baseId;
+        offset = 0;
+        document.getElementById("gallery").innerHTML = "";
+        initObserver();
+        loadGallery();
+      });
+      baseSelector.appendChild(thumb);
+    });
+    // Append "Add New Base" thumbnail as the last item
+    const addNewThumb = document.createElement("div");
+    addNewThumb.classList.add("base-thumb", "new-base-thumb");
+    addNewThumb.innerHTML = "<span>+</span>";
+    addNewThumb.addEventListener("click", () => {
+      document.getElementById("baseUploadModal").style.display = "flex";
+    });
+    baseSelector.appendChild(addNewThumb);
+    // If no base was previously selected, choose the first one.
     if (!selectedBase) {
       selectedBase = baseList[0].baseId;
       document.getElementById("floatingBaseImage").src = baseList[0].url;
@@ -49,11 +54,6 @@ async function loadBaseImages() {
     console.error("Error loading base images:", err);
   }
 }
-
-// New Base Gallery button inside floating container
-document.getElementById("newBaseButton").addEventListener("click", function () {
-  document.getElementById("baseUploadModal").style.display = "flex";
-});
 
 // Close base upload modal logic
 document.getElementById("baseUploadModal").addEventListener("click", function (e) {

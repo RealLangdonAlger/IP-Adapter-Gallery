@@ -1,0 +1,233 @@
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #121212;
+  color: #ffffff;
+  text-align: center;
+  margin: 0;
+  padding: 20px;
+}
+h1,
+h2 {
+  color: #ffffff;
+}
+
+/* Header & Upload Button */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+}
+.open-upload-modal {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+}
+.open-upload-modal svg {
+  fill: #fff;
+  width: 100%;
+  height: 100%;
+  transition: fill 0.2s;
+}
+.open-upload-modal:hover svg {
+  fill: #0f0;
+}
+
+/* Gallery */
+.gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+.entry {
+  background: #1e1e1e;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  max-width: 600px;
+  position: relative;
+}
+.entry-title {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 5px;
+}
+.grid img {
+  width: 128px;
+  height: 128px;
+  object-fit: cover;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.grid img:hover {
+  transform: scale(1.1);
+}
+.overlay {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-size: 12px;
+  padding: 3px 6px;
+  border-radius: 3px;
+  top: 5px;
+  left: 5px;
+  z-index: 1;
+}
+.delete-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+}
+.delete-button svg {
+  fill: #fff;
+  width: 100%;
+  height: 100%;
+  transition: fill 0.2s;
+}
+.delete-button:hover svg {
+  fill: #f00;
+}
+.lightbox {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+.lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 10px;
+}
+
+/* Upload Modal */
+.upload-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 20;
+  justify-content: center;
+  align-items: center;
+}
+.upload-modal-content {
+  background: #1e1e1e;
+  padding: 30px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 600px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+.close-upload-modal {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+}
+.close-upload-modal svg {
+  fill: #fff;
+  width: 100%;
+  height: 100%;
+  transition: fill 0.2s;
+}
+.close-upload-modal:hover svg {
+  fill: #f00;
+}
+.upload-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 15px;
+  justify-items: center;
+}
+.upload-item {
+  border: 2px dashed #555;
+  border-radius: 5px;
+  width: 256px;
+  height: 256px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  background: transparent;
+}
+.upload-item label {
+  position: absolute;
+  z-index: 1;
+  color: #ccc;
+  font-size: 12px;
+  text-align: center;
+  width: 100%;
+  pointer-events: none;
+}
+.upload-item input[type="file"] {
+  opacity: 0;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+.upload-item img.preview {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+  display: none;
+}
+/* Modernized caption input */
+#caption {
+  width: 100%;
+  padding: 8px;
+  background-color: #2e2e2e;
+  border: 2px dotted #777;
+  color: #fff;
+  border-radius: 4px;
+}
+/* Button Styles */
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #444;
+}

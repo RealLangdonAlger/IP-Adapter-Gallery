@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IP Adapter Gallery</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>IP Adapter Gallery</h1>
+      <button class="open-upload-modal" title="Upload New Entry">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M19 11h-6V5h-2v6H5v2h6v6h2v-6h6z" />
+        </svg>
+      </button>
+    </header>
+
+    <!-- Fullscreen Upload Modal -->
+    <div id="uploadModal" class="upload-modal">
+      <div class="upload-modal-content">
+        <button class="close-upload-modal" title="Close Upload">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
+        <h2>Upload New Entry</h2>
+        <form id="uploadForm">
+          <div class="upload-grid">
+            <div class="upload-item" id="ipa-dropzone">
+              <label>IP-A Reference Image</label>
+              <input type="file" name="ipa" accept="image/*" required />
+              <img class="preview" alt="Preview" />
+            </div>
+            <div class="upload-item" id="style-dropzone">
+              <label>Style Image</label>
+              <input type="file" name="style" accept="image/*" required />
+              <img class="preview" alt="Preview" />
+            </div>
+            <div class="upload-item" id="comp-dropzone">
+              <label>Comp Image</label>
+              <input type="file" name="comp" accept="image/*" required />
+              <img class="preview" alt="Preview" />
+            </div>
+            <div class="upload-item" id="both-dropzone">
+              <label>Both Image</label>
+              <input type="file" name="both" accept="image/*" required />
+              <img class="preview" alt="Preview" />
+            </div>
+          </div>
+          <div>
+            <label for="caption">Caption:</label><br />
+            <input type="text" id="caption" name="caption" required />
+          </div>
+          <br />
+          <button type="submit">Upload Entry</button>
+        </form>
+        <div id="uploadStatus"></div>
+      </div>
+    </div>
+
+    <div class="gallery" id="gallery"></div>
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+      <img id="lightboxImg" />
+    </div>
+
+    <!-- Sentinel element for infinite scroll -->
+    <div id="scrollSentinel"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

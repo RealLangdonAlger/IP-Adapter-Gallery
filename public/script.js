@@ -12,13 +12,33 @@ async function loadBaseImages() {
     const baseList = await response.json();
     const baseSelector = document.getElementById("baseSelector");
     baseSelector.innerHTML = "";
+
+    const floatingBaseImage = document.getElementById("floatingBaseImage");
+    const floatingBaseTitle = document.getElementById("floatingBaseTitle");
+    const deleteBaseButton = document.getElementById("deleteBaseButton");
+
     if (baseList.length === 0) {
+      // No base images available: show only the "Add New Base" thumbnail and hide image and delete button.
+      const addNewThumb = document.createElement("div");
+      addNewThumb.classList.add("base-thumb", "new-base-thumb");
+      addNewThumb.innerHTML = "<span>+</span>";
+      addNewThumb.addEventListener("click", () => {
+        document.getElementById("baseUploadModal").style.display = "flex";
+      });
+      baseSelector.appendChild(addNewThumb);
+      
       selectedBase = "";
-      document.getElementById("floatingBaseImage").src = "";
-      document.getElementById("floatingBaseTitle").textContent = "No Base Available";
+      floatingBaseImage.style.display = "none";
+      deleteBaseButton.style.display = "none";
+      floatingBaseTitle.textContent = "No Base Available";
       return;
     }
-    // Create thumbnail elements for each base
+    
+    // If bases exist, ensure the floating base image and delete button are visible.
+    floatingBaseImage.style.display = "block";
+    deleteBaseButton.style.display = "block";
+
+    // Create thumbnail elements for each base image.
     baseList.forEach(base => {
       const thumb = document.createElement("img");
       thumb.src = base.url;
@@ -27,8 +47,8 @@ async function loadBaseImages() {
       thumb.dataset.baseId = base.baseId;
       thumb.addEventListener("click", () => {
         selectedBase = base.baseId;
-        document.getElementById("floatingBaseImage").src = base.url;
-        document.getElementById("floatingBaseTitle").textContent = "Base Generation: " + base.baseId;
+        floatingBaseImage.src = base.url;
+        floatingBaseTitle.textContent = "Base Generation: " + base.baseId;
         offset = 0;
         document.getElementById("gallery").innerHTML = "";
         initObserver();
@@ -36,7 +56,7 @@ async function loadBaseImages() {
       });
       baseSelector.appendChild(thumb);
     });
-    // Append "Add New Base" thumbnail as the last item
+    // Append "Add New Base" thumbnail as the last item.
     const addNewThumb = document.createElement("div");
     addNewThumb.classList.add("base-thumb", "new-base-thumb");
     addNewThumb.innerHTML = "<span>+</span>";
@@ -44,11 +64,12 @@ async function loadBaseImages() {
       document.getElementById("baseUploadModal").style.display = "flex";
     });
     baseSelector.appendChild(addNewThumb);
-    // If no base was previously selected, choose the first one.
+
+    // If no base was previously selected, select the first one.
     if (!selectedBase) {
       selectedBase = baseList[0].baseId;
-      document.getElementById("floatingBaseImage").src = baseList[0].url;
-      document.getElementById("floatingBaseTitle").textContent = "Base Generation: " + baseList[0].baseId;
+      floatingBaseImage.src = baseList[0].url;
+      floatingBaseTitle.textContent = "Base Generation: " + baseList[0].baseId;
     }
   } catch (err) {
     console.error("Error loading base images:", err);

@@ -82,9 +82,9 @@ async function findRefImage(refNumber) {
 }
 
 // GET /get-image/:refNumber/:type – dynamically serve images.
-// • For type "ipa": returns the original IPA file.
+// • For type "ipa": returns a processed 512x512 version (resize shortest edge to 512 and center crop).
 // • For types "style", "comp", or "both": checks for a downscaled version in images_compressed,
-//   and if not found, processes the original image (from images/<refNumber>-type.jpg),
+//   and if not found, processes the original image (from images/<refNumber>-type.png),
 //   saves the downscaled version, then serves it.
 app.get("/get-image/:refNumber/:type", async (req, res) => {
   const refNumber = req.params.refNumber;
@@ -92,11 +92,23 @@ app.get("/get-image/:refNumber/:type", async (req, res) => {
   console.log(`[DEBUG] GET /get-image/${refNumber}/${type} called.`);
   try {
     if (type === "ipa") {
-      const ipaFile = await findRefImage(refNumber);
-      if (ipaFile) {
-        return res.sendFile(path.join(imagesDir, ipaFile));
+      // Process IPA image: resize so that shortest edge is 512 and center crop to 512x512
+      const processedFileName = `${refNumber}-ipa.png`;
+      const processedPath = path.join(imagesCompressedDir, processedFileName);
+      if (fs.existsSync(processedPath)) {
+        return res.sendFile(processedPath);
       } else {
-        return res.status(404).json({ error: "IPA image not found" });
+        const ipaFile = await findRefImage(refNumber);
+        if (!ipaFile) {
+          return res.status(404).json({ error: "IPA image not found" });
+        }
+        const originalPath = path.join(imagesDir, ipaFile);
+        await sharp(originalPath)
+          .resize(512, 512, { fit: "cover", position: "center" })
+          .png()
+          .toFile(processedPath);
+        console.log(`[DEBUG] Created processed IPA image: ${processedFileName}`);
+        return res.sendFile(processedPath);
       }
     } else if (["style", "comp", "both"].includes(type)) {
       const compressedFileName = `${refNumber}-${type}.jpg`;
@@ -110,7 +122,7 @@ app.get("/get-image/:refNumber/:type", async (req, res) => {
         if (!fs.existsSync(originalPath)) {
           return res.status(404).json({ error: "Original image not found" });
         }
-        // Downscale by 50%
+        // Downscale by 50% (or adjust as needed)
         const image = sharp(originalPath);
         const metadata = await image.metadata();
         const newWidth = Math.round(metadata.width * 0.5);
@@ -129,8 +141,8 @@ app.get("/get-image/:refNumber/:type", async (req, res) => {
 });
 
 // POST /upload – handle new entry uploads asynchronously.
-// Saves IPA image as received and stores originals for style, comp, and both.
-// (These originals remain untouched; compression is done on-demand.)
+// Saves IPA image and stores originals for style, comp, and both.
+// (These originals remain untouched; on-demand processing is performed when requested.)
 app.post(
   "/upload",
   upload.fields([
@@ -154,7 +166,7 @@ app.post(
       });
       const newId = maxId + 1;
 
-      // Save IPA image losslessly in its original size
+      // Save IPA image (original is saved; on-demand processing will occur upon request)
       if (req.files.ipa && req.files.ipa[0]) {
         const ipaFile = req.files.ipa[0];
         if (!ipaFile.mimetype.startsWith("image/")) {
@@ -167,7 +179,7 @@ app.post(
         return res.status(400).json({ error: "IP-A reference image is required." });
       }
 
-      // Save originals for style, comp, and both (compression happens on demand)
+      // Save originals for style, comp, and both (compression is done on-demand)
       async function saveOriginal(file, suffix) {
         if (!file.mimetype.startsWith("image/")) {
           throw new Error(`Invalid file type for ${suffix} image.`);
@@ -234,6 +246,7 @@ app.delete("/delete/:id", async (req, res) => {
     }
     // Delete any compressed images if they exist
     const compressedFiles = [
+      `${refId}-ipa.png`,
       `${refId}-style.jpg`,
       `${refId}-comp.jpg`,
       `${refId}-both.jpg`

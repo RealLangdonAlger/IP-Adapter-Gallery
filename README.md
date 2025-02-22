@@ -36,7 +36,7 @@ Populating the gallery is done manually for now.
    The **IPA** image can be dragged directly into WebUI's ControlNet for ease-of-use. Likewise, the **base** image can also be dragged into WebUI's prompt area to read all its parameters.
 
 3. **Uploading New Gallery Entries:**  
-   Click the upload button (next to the header) to open the upload modal. Drop in your *IPA*, *Style*, *Composition*, and '*Both*' aka *Style & Composition* images along with a caption.
+   Click the upload button (next to the header) to open the upload modal. Drop in your *IPA*, *Style*, *Composition*, and '*Both*' aka *Style & Composition* images along with a caption. The drop-zones support drag & drop of WebUI image outputs directly into the upload fields for convenience.
 
    The new entry is added to the currently selected base gallery.
 
@@ -72,25 +72,7 @@ Alternatively:
     npm install express multer sharp
     ```
 
-2. **Folder Structure:**
-    Folder Structure:
-    Ensure the following folder structure exists (the server will auto-create missing folders):
-  
-    ```bash
-    public/
-    ├── base_images/             # Base generation images (e.g. base1.png, base2.png, …)
-    ├── galleries/
-    │   ├── base1/
-    │   │    ├── images/         # IPA, Style, Comp, Both images for base1
-    │   │    └── captions/       # Captions for base1 entries
-    │   └── base2/
-    │        ├── images/
-    │        └── captions/
-    ├── images_compressed/       # Compressed images in subfolders per base (e.g. base1, base2)
-    └── (other static assets)
-    ```
-
-3. **Run:**
+2. **Run:**
     ```bash
     node server.js
     ```

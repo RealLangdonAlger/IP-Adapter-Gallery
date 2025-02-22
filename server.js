@@ -1,12 +1,19 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const multer = require("multer");
-const sharp = require("sharp");
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+import express from 'express';
+import multer from 'multer';
+import sharp from 'sharp';
+import fetch from 'node-fetch';
 
 const app = express();
 const PORT = 3000;
 const fsPromises = fs.promises;
+
+// Define __filename and __dirname in ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Directories for base galleries, base images, and compressed images
 const galleriesDir = path.join(__dirname, "public", "galleries");
@@ -47,6 +54,27 @@ const upload = multer({ storage: storage });
 
 // Serve static files from "public"
 app.use(express.static("public"));
+
+/* ===== Proxy to bypass CORS nonsense ===== */
+app.get("/proxy", async (req, res) => {
+  const url = req.query.url;
+  if (!url) {
+    return res.status(400).send("Missing URL");
+  }
+  try {
+    // Optional: Validate the URL here to ensure only allowed origins are fetched.
+    const response = await fetch(url);
+    if (!response.ok) {
+      return res.status(500).send("Error fetching the image");
+    }
+    // Set the appropriate content-type header and pipe the image data
+    res.set("Content-Type", response.headers.get("content-type"));
+    response.body.pipe(res);
+  } catch (err) {
+    console.error("Proxy error:", err);
+    res.status(500).send("Server error while fetching image");
+  }
+});
 
 /* ===== New Endpoints for Base Galleries ===== */
 
@@ -433,7 +461,6 @@ async function deleteGalleryEntry(baseId, refId) {
     console.error(`[DEBUG] Failed to delete gallery entry ${refId}: ${err}`);
   }
 }
-
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

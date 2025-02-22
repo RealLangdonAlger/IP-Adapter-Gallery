@@ -133,6 +133,49 @@ document.getElementById("baseUploadForm").addEventListener("submit", async funct
   }
 });
 
+// Extend drop-zone handler to support URL drops
+document.querySelectorAll('.upload-item').forEach(dropZone => {
+  dropZone.addEventListener('dragover', event => {
+    event.preventDefault();
+  });
+
+  dropZone.addEventListener('drop', async event => {
+    event.preventDefault();
+
+    // Try to get a URL from the dropped data
+    let url = event.dataTransfer.getData('text/uri-list') || event.dataTransfer.getData('text');
+    const input = dropZone.querySelector('input[type="file"]');
+
+    if (url && url.startsWith("http")) {
+      try {
+        // Fetch the image data from the URL
+        //const response = await fetch(url);
+		const proxyUrl = `/proxy?url=` + encodeURIComponent(url);
+		const response = await fetch(proxyUrl);
+
+        const blob = await response.blob();
+
+        // Create a File object from the blob. The name can be generic or parsed from the URL.
+        const file = new File([blob], "dropped-image.png", { type: blob.type });
+
+        // Create a new DataTransfer object and add the file
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;
+
+        // Trigger the change event to update the preview
+        input.dispatchEvent(new Event('change'));
+      } catch (err) {
+        console.error("Failed to load image from dropped URL:", err);
+      }
+    } else if (event.dataTransfer.files.length > 0) {
+      // If files were dropped normally, let the normal change event handler process them.
+      input.files = event.dataTransfer.files;
+      input.dispatchEvent(new Event('change'));
+    }
+  });
+});
+
 // Floating base image toggle
 function toggleFloatingBaseImage() {
   const container = document.querySelector(".floating-base-image");

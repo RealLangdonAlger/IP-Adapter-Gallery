@@ -66,8 +66,13 @@ Recommended to just launch the **run.bat** file to install all requirements, sta
 
 Alternatively:
 
-1. **Install Dependencies:**
+1. **Clone this repo:**
+    ```bash
+    git clone https://github.com/RealLangdonAlger/IP-Adapter-Gallery
+    cd IP-Adapter-Gallery
+    ```
 
+3. **Install Dependencies:**
     ```bash
     npm install express multer sharp
     ```

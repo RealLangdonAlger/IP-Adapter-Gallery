@@ -192,23 +192,12 @@ app.get("/get-image/:baseId/:refNumber/:type", async (req, res) => {
     const { imagesDir } = getGalleryDirs(baseId);
     const compDir = getCompressedDir(baseId);
     if (type === "ipa") {
-      const processedFileName = `${refNumber}-ipa.png`;
-      const processedPath = path.join(compDir, processedFileName);
-      if (fs.existsSync(processedPath)) {
-        return res.sendFile(processedPath);
-      } else {
         const ipaFile = await findRefImage(baseId, refNumber);
         if (!ipaFile) {
           return res.status(404).json({ error: "IPA image not found" });
         }
         const originalPath = path.join(imagesDir, ipaFile);
-        await sharp(originalPath)
-          .resize(512, 512, { fit: "cover", position: "center" })
-          .png()
-          .toFile(processedPath);
-        console.log(`[DEBUG] Created processed IPA image: ${processedFileName}`);
-        return res.sendFile(processedPath);
-      }
+        return res.sendFile(originalPath);
     } else if (["style", "comp", "both"].includes(type)) {
       const compressedFileName = `${refNumber}-${type}.jpg`;
       const compressedPath = path.join(compDir, compressedFileName);

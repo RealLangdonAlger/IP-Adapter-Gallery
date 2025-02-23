@@ -13,7 +13,6 @@ Populating the gallery is done manually for now.
   
 - **Dynamic Image Processing:**  
   On-demand image compression and resizing:
-  - **IPA images:** Resized so that the shortest edge is 512 pixels, then center-cropped to a 512×512 square.
   - **Style, Composition, and Both images:** Downscaled (compressed) for optimized bandwidth.
 
 - **Infinite Scrolling Gallery:**  
@@ -53,7 +52,7 @@ Populating the gallery is done manually for now.
 
 6. **Image Processing:**  
    When an image is requested:
-   - IPA images are dynamically resized and cropped to 512×512. By default IP Adapter expects a 224x224 pixel image, but some preprocessors support higher resolutions. 
+   - IPA images are delivered in their original form to maintain reproducibility. 
    - Other images (Style, Composition, Both) are downscaled by 50% if a compressed version does not already exist.
 
 7. **Deleting Entries:**  

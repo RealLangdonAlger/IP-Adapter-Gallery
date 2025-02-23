@@ -138,6 +138,7 @@ header {
   max-width: 90%;
   max-height: 90%;
   border-radius: 10px;
+  border: 5px dashed #fff;
 }
 
 /* Upload Modal */
@@ -370,4 +371,101 @@ button:hover {
 }
 #deleteBaseButton:hover {
   background-color: #c0392b;
+}
+
+/* Floating Edit UI (modern minimalistic style) */
+#editUI {
+  position: fixed;
+  top: 10px;
+  left: 320px;
+  max-height: 48px;
+  background: #ffffff;
+  border: 1px solid #555;
+  border-radius: 8px;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+#editUI button {
+  background: none;
+  font-weight: bold;
+  color: #ccc;
+  border: 1px solid;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin: 0;
+}
+#editUI button:hover {
+  background: #ccc;
+}
+#editUI label {
+  color: #333;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 150px;
+  margin: 0;
+}
+#editUI input[type="color"] {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  width: 104px;
+  height: 24px;
+  padding: 0;
+}
+#editUI input[type="range"] {
+  -webkit-appearance: none;
+  width: 100px;
+  height: 4px;
+  background: #ddd;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+#editUI input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #333;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+#editUI input[type="range"]::-webkit-slider-thumb:hover {
+  background: #555;
+}
+
+#editingCanvas {
+  border: 5px solid #0000;      
+  border-radius: 10px;
+
+  background: linear-gradient(#fff, #000) padding-box, linear-gradient(
+        var(--angle),
+        #f00,
+        #0f0,
+		#00f
+      ) border-box;
+  animation: 4s rotate linear infinite;
+}
+
+@keyframes rotate {
+  to {
+    --angle: 360deg;
+  }
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
 }

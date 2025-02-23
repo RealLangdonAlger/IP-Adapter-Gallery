@@ -101,7 +101,28 @@
 
     <div class="gallery" id="gallery"></div>
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-      <img id="lightboxImg" />
+      <div id="overlayContainer" style="position: relative; display: inline-block;">
+        <img id="lightboxImg" style="display: block; max-width: 90vw; max-height: 90vh;" />
+        <!-- Pre-created hidden canvas for edit mode -->
+        <canvas id="editingCanvas" style="display: none; position: absolute; top: 0; left: 0;"></canvas>
+      </div>
+    </div>
+	
+	<!-- New Edit UI Container Floating Next to the Base Generation Selector -->
+    <div id="editUI" style="display: none;">
+      <button id="editImageButton" onclick="toggleEditMode(event)">
+         <svg id="editIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
+           <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+         </svg>
+       </button>
+      <div id="editControls">
+        <label>Color:
+          <input type="color" id="brushColor" value="#ff0000">
+        </label>
+        <label>Size:
+          <input type="range" id="brushSize" min="1" max="50" value="10">
+        </label>
+      </div>
     </div>
 
     <!-- Sentinel element for infinite scroll -->

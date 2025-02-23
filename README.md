@@ -25,6 +25,9 @@ Populating the gallery is done manually for now.
 - **Interactive Base Selection:**  
   A floating panel displays a row of base image thumbnails (with an integrated “+” button for adding new bases) that lets you switch between galleries at a glance.
 
+- **Canvas Editing:**  
+  Activate a canvas overlay on IPA images for quick in-browser edits. Adjust brush color and size with intuitive controls to tweak images directly within the gallery view. These changes are temporary. Useful for making character features like eye and hair color match the prompt to avoid conflicts.
+
 ## Usage
 
 1. **Viewing Galleries:**  

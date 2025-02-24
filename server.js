@@ -542,9 +542,10 @@ async function deleteGalleryEntry(baseId, refId) {
 }
 
 // Compute a simple average hash (aHash) for an image buffer
+const FINGERPRINT_SIZE = 8;
 async function computeImageHash(buffer) {
   const { data } = await sharp(buffer)
-    .resize(16, 16, { fit: "fill" })
+    .resize(FINGERPRINT_SIZE, FINGERPRINT_SIZE, { fit: "fill" })
     .grayscale()
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -556,6 +557,35 @@ async function computeImageHash(buffer) {
   let hash = "";
   for (let i = 0; i < data.length; i++) {
     hash += data[i] > avg ? "1" : "0";
+  }
+  return hash;
+}
+
+// Compute a simple color hash for an image buffer
+// This function preserves color information by not converting to grayscale.
+const COLOR_HASH_SIZE = 4;
+async function computeColorHash(buffer) {
+  const { data, info } = await sharp(buffer)
+    .resize(COLOR_HASH_SIZE, COLOR_HASH_SIZE, { fit: "fill" })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const numPixels = info.width * info.height;
+  let totalR = 0,
+    totalG = 0,
+    totalB = 0;
+  for (let i = 0; i < data.length; i += info.channels) {
+    totalR += data[i];
+    totalG += data[i + 1];
+    totalB += data[i + 2];
+  }
+  const avgR = totalR / numPixels;
+  const avgG = totalG / numPixels;
+  const avgB = totalB / numPixels;
+  let hash = "";
+  for (let i = 0; i < data.length; i += info.channels) {
+    hash += data[i] > avgR ? "1" : "0";
+    hash += data[i + 1] > avgG ? "1" : "0";
+    hash += data[i + 2] > avgB ? "1" : "0";
   }
   return hash;
 }
@@ -679,7 +709,7 @@ app.post(
         );
         await saveFingerprintCache();
       }
-      const threshold = 16; // Adjust threshold as needed
+      const threshold = (FINGERPRINT_SIZE * FINGERPRINT_SIZE) / 10; // 10% of the total fingerprint size
       const isSimilar = minDistance <= threshold;
       return res.json({ similar: isSimilar, minDistance });
     } catch (err) {
@@ -688,6 +718,83 @@ app.post(
     }
   }
 );
+
+// GET /similarity/:baseId/:refNumber – compute similarity between base and style/comp images
+app.get("/similarity/:baseId/:refNumber", async (req, res) => {
+  const { baseId, refNumber } = req.params;
+  try {
+    // Load the base image with caching
+    const baseImagePath = path.join(baseImagesDir, `${baseId}.png`);
+    if (!fs.existsSync(baseImagePath)) {
+      return res.status(404).json({ error: "Base image not found" });
+    }
+    if (!fingerprintCache[baseId]) {
+      fingerprintCache[baseId] = {};
+    }
+    let updated = false;
+    async function getFingerprint(filePath, key) {
+      if (fingerprintCache[baseId][key]) {
+        return fingerprintCache[baseId][key];
+      } else {
+        const buffer = await fsPromises.readFile(filePath);
+        const hash = await computeImageHash(buffer);
+        fingerprintCache[baseId][key] = hash;
+        updated = true;
+        return hash;
+      }
+    }
+    const baseKey = `${baseId}.png`;
+    const baseHash = await getFingerprint(baseImagePath, baseKey);
+
+    // Get gallery images directory for this base
+    const { imagesDir } = getGalleryDirs(baseId);
+
+    // Load and cache the Style image
+    const styleImagePath = path.join(imagesDir, `${refNumber}-style.png`);
+    if (!fs.existsSync(styleImagePath)) {
+      return res.status(404).json({ error: "Style image not found" });
+    }
+    const styleKey = `${refNumber}-style.png`;
+    const styleHash = await getFingerprint(styleImagePath, styleKey);
+    const styleDistance = hammingDistance(baseHash, styleHash);
+
+    // Load and cache the Comp image
+    const compImagePath = path.join(imagesDir, `${refNumber}-comp.png`);
+    if (!fs.existsSync(compImagePath)) {
+      return res.status(404).json({ error: "Comp image not found" });
+    }
+    const compKey = `${refNumber}-comp.png`;
+    const compHash = await getFingerprint(compImagePath, compKey);
+    const compDistance = hammingDistance(baseHash, compHash);
+
+    // Load and cache the Both image
+    const bothImagePath = path.join(imagesDir, `${refNumber}-both.png`);
+    if (!fs.existsSync(bothImagePath)) {
+      return res.status(404).json({ error: "Both image not found" });
+    }
+    const bothKey = `${refNumber}-both.png`;
+    const bothHash = await getFingerprint(bothImagePath, bothKey);
+
+    // Compute distances between the Both image and the Style/Comp images
+    const bothDistanceStyle = hammingDistance(bothHash, styleHash);
+    const bothDistanceComp = hammingDistance(bothHash, compHash);
+
+    // If any new fingerprints were computed, save the cache to disk
+    if (updated) {
+      await saveFingerprintCache();
+    }
+    // Return the similarity scores to the client for further client-side processing
+    return res.json({
+      styleDistance,
+      compDistance,
+      bothDistanceStyle,
+      bothDistanceComp,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Similarity computation failed" });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);

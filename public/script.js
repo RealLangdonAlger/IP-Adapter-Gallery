@@ -523,6 +523,36 @@ async function loadGallery() {
         </div>
       `;
       gallery.appendChild(entry);
+
+      // Fetch similarity info for this entry and prepend a tag label with scores for debugging
+      fetch(`/similarity/${selectedBase}/${refNumber}`)
+        .then((response) => response.json())
+        .then((data) => {
+          const tagLabel = document.createElement("div");
+          tagLabel.className = "similarity-tag";
+          // Apply intelligent weighing: give the base-to-Style distance a leeway by applying a weight factor.
+          const styleWeight = 1.2;
+          const weightedCombinedStyle =
+            (data.styleDistance * styleWeight + data.bothDistanceStyle) / 2;
+          const combinedComp = (data.compDistance + data.bothDistanceComp) / 2;
+          // If the weighted style average is greater than the comp average, the style preset has a heavier impact.
+          const label = weightedCombinedStyle > combinedComp ? "Style" : "Comp";
+          // Show only the label in the tag with proper styling.
+          tagLabel.innerHTML = `<span class="${label.toLowerCase()}-label">[${label}]</span>`;
+          // Attach the debug data as a tooltip.
+          tagLabel.title = `Weighted Style: ${weightedCombinedStyle.toFixed(
+            2
+          )} vs Comp: ${combinedComp.toFixed(2)}\nRaw: S: ${
+            data.styleDistance
+          }, BS: ${data.bothDistanceStyle}, C: ${data.compDistance}, BC: ${
+            data.bothDistanceComp
+          }`;
+          // Insert the tag label at the top of the entry
+          entry.insertBefore(tagLabel, entry.firstChild);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch similarity scores:", err);
+        });
     }
     offset += limit;
   } catch (error) {

@@ -578,7 +578,7 @@ fsPromises
   .readFile(cacheFilePath, "utf8")
   .then((data) => {
     fingerprintCache = JSON.parse(data);
-    console.log("[DEBUG] Fingerprint cache loaded from disk:", fingerprintCache);
+    console.log("[DEBUG] Fingerprint cache loaded from disk");
   })
   .catch(() => {
     console.log("[DEBUG] No fingerprint cache found, starting fresh");
@@ -614,6 +614,7 @@ async function getCachedFingerprint(baseId, fileName) {
 // POST /check-similarity/:baseId – Check if an uploaded IPA image is similar to existing ones in the gallery.
 app.post("/check-similarity/:baseId", upload.single("ipa"), async (req, res) => {
   const baseId = req.params.baseId;
+  console.log(`[DEBUG] POST /check-similarity/${baseId} called.`);
   try {
     if (!req.file || !req.file.mimetype.startsWith("image/")) {
       return res.status(400).json({ error: "Invalid file or no file provided" });
@@ -668,6 +669,7 @@ app.post("/check-similarity/:baseId", upload.single("ipa"), async (req, res) => 
 // GET /similarity/:baseId/:refNumber – compute similarity between base and style/comp images
 app.get("/similarity/:baseId/:refNumber", async (req, res) => {
   const { baseId, refNumber } = req.params;
+  console.log(`[DEBUG] POST /similarity/${baseId}/${refNumber} called.`);
   try {
     // Load the base image (assumed to be stored as baseId.png in baseImagesDir)
     const baseImagePath = path.join(baseImagesDir, `${baseId}.png`);

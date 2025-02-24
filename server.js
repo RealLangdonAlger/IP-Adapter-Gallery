@@ -1,3 +1,5 @@
+/* eslint-disable no-empty */
+/* eslint-disable no-unused-vars */
 import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
@@ -33,11 +35,7 @@ ensureDir(tempDir);
 // Clear out the temporary folder on server startup
 fsPromises
   .readdir(tempDir)
-  .then((files) =>
-    Promise.all(
-      files.map((file) => fsPromises.unlink(path.join(tempDir, file)))
-    )
-  )
+  .then((files) => Promise.all(files.map((file) => fsPromises.unlink(path.join(tempDir, file)))))
   .then(() => {
     console.log("[DEBUG] Temporary folder cleared on startup");
   })
@@ -156,11 +154,7 @@ app.post("/uploadBase", upload.single("baseImage"), async (req, res) => {
 // GET /references/:baseId – paginated gallery entries for a base
 app.get("/references/:baseId", async (req, res) => {
   const baseId = req.params.baseId;
-  console.log(
-    `[DEBUG] GET /references/${baseId} called. Query: ${JSON.stringify(
-      req.query
-    )}`
-  );
+  console.log(`[DEBUG] GET /references/${baseId} called. Query: ${JSON.stringify(req.query)}`);
   try {
     const { imagesDir } = getGalleryDirs(baseId);
     const offset = parseInt(req.query.offset) || 0;
@@ -286,11 +280,7 @@ app.post(
   ]),
   async (req, res) => {
     const baseId = req.params.baseId;
-    console.log(
-      `[DEBUG] POST /upload/${baseId} called. Files: ${Object.keys(
-        req.files
-      ).join(", ")}; Body: ${JSON.stringify(req.body)}`
-    );
+    console.log(`[DEBUG] POST /upload/${baseId} called. Files: ${Object.keys(req.files).join(", ")}; Body: ${JSON.stringify(req.body)}`);
     try {
       const { imagesDir } = getGalleryDirs(baseId);
       // Determine new reference ID by scanning gallery images (IPA files)
@@ -308,34 +298,23 @@ app.post(
       if (req.files.ipa && req.files.ipa[0]) {
         const ipaFile = req.files.ipa[0];
         if (!ipaFile.mimetype.startsWith("image/")) {
-          return res
-            .status(400)
-            .json({ error: "Invalid file type for IPA image." });
+          return res.status(400).json({ error: "Invalid file type for IPA image." });
         }
         const ext = path.extname(ipaFile.originalname) || ".jpg";
         const ipaFilename = `${newId}${ext}`;
-        await fsPromises.writeFile(
-          path.join(imagesDir, ipaFilename),
-          ipaFile.buffer
-        );
+        await fsPromises.writeFile(path.join(imagesDir, ipaFilename), ipaFile.buffer);
 
         // Update the fingerprint cache for this base
         if (!fingerprintCache[baseId]) {
           fingerprintCache[baseId] = {};
         }
-        const savedBuffer = await fsPromises.readFile(
-          path.join(imagesDir, ipaFilename)
-        );
+        const savedBuffer = await fsPromises.readFile(path.join(imagesDir, ipaFilename));
         const newFileHash = await computeImageHash(savedBuffer);
         fingerprintCache[baseId][ipaFilename] = newFileHash;
-        console.debug(
-          `[DEBUG] New IPA fingerprint cached for file ${ipaFilename}: ${newFileHash}`
-        );
+        console.debug(`[DEBUG] New IPA fingerprint cached for file ${ipaFilename}: ${newFileHash}`);
         await saveFingerprintCache();
       } else {
-        return res
-          .status(400)
-          .json({ error: "IPA reference image is required." });
+        return res.status(400).json({ error: "IPA reference image is required." });
       }
       // Save originals for style, comp, and both
       async function saveOriginal(file, suffix) {
@@ -369,13 +348,8 @@ app.post(
       // Save caption
       const { captionsDir } = getGalleryDirs(baseId);
       const captionText = req.body.caption || "";
-      await fsPromises.writeFile(
-        path.join(captionsDir, `${newId}.txt`),
-        captionText
-      );
-      console.log(
-        `[DEBUG] Upload successful. New entry id: ${newId} in base ${baseId}`
-      );
+      await fsPromises.writeFile(path.join(captionsDir, `${newId}.txt`), captionText);
+      console.log(`[DEBUG] Upload successful. New entry id: ${newId} in base ${baseId}`);
       res.json({
         message: "Upload successful",
         id: newId,
@@ -404,11 +378,7 @@ app.delete("/delete/:baseId/:id", async (req, res) => {
     }
     await fsPromises.unlink(path.join(imagesDir, ipaFileName));
     console.log(`[DEBUG] Deleted IPA file: ${ipaFileName}`);
-    const originals = [
-      `${refId}-style.png`,
-      `${refId}-comp.png`,
-      `${refId}-both.png`,
-    ];
+    const originals = [`${refId}-style.png`, `${refId}-comp.png`, `${refId}-both.png`];
     for (const fileName of originals) {
       const filePath = path.join(imagesDir, fileName);
       try {
@@ -416,12 +386,7 @@ app.delete("/delete/:baseId/:id", async (req, res) => {
         console.log(`[DEBUG] Deleted original file: ${fileName}`);
       } catch (e) {}
     }
-    const compressedFiles = [
-      `${refId}-ipa.png`,
-      `${refId}-style.jpg`,
-      `${refId}-comp.jpg`,
-      `${refId}-both.jpg`,
-    ];
+    const compressedFiles = [`${refId}-ipa.png`, `${refId}-style.jpg`, `${refId}-comp.jpg`, `${refId}-both.jpg`];
     for (const fileName of compressedFiles) {
       const filePath = path.join(compDir, fileName);
       try {
@@ -498,11 +463,7 @@ async function deleteGalleryEntry(baseId, refId) {
     await fsPromises.unlink(ipaFilePath);
     console.log(`[DEBUG] Deleted IPA file: ${ipaFilePath}`);
     // Delete Style, Comp, Both files
-    const filesToDelete = [
-      `${refId}-style.png`,
-      `${refId}-comp.png`,
-      `${refId}-both.png`,
-    ];
+    const filesToDelete = [`${refId}-style.png`, `${refId}-comp.png`, `${refId}-both.png`];
     filesToDelete.forEach(async (fileName) => {
       const filePath = path.join(imagesDir, fileName);
       try {
@@ -513,12 +474,7 @@ async function deleteGalleryEntry(baseId, refId) {
       }
     });
     // Delete compressed images
-    const compressedFiles = [
-      `${refId}-ipa.png`,
-      `${refId}-style.jpg`,
-      `${refId}-comp.jpg`,
-      `${refId}-both.jpg`,
-    ];
+    const compressedFiles = [`${refId}-ipa.png`, `${refId}-style.jpg`, `${refId}-comp.jpg`, `${refId}-both.jpg`];
     compressedFiles.forEach(async (fileName) => {
       const filePath = path.join(compDir, fileName);
       try {
@@ -542,13 +498,9 @@ async function deleteGalleryEntry(baseId, refId) {
 }
 
 // Compute a simple average hash (aHash) for an image buffer
-const FINGERPRINT_SIZE = 8;
+const SHAPE_FINGERPRINT = 8;
 async function computeImageHash(buffer) {
-  const { data } = await sharp(buffer)
-    .resize(FINGERPRINT_SIZE, FINGERPRINT_SIZE, { fit: "fill" })
-    .grayscale()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
+  const { data } = await sharp(buffer).resize(SHAPE_FINGERPRINT, SHAPE_FINGERPRINT, { fit: "fill" }).grayscale().raw().toBuffer({ resolveWithObject: true });
   let total = 0;
   for (let i = 0; i < data.length; i++) {
     total += data[i];
@@ -561,33 +513,17 @@ async function computeImageHash(buffer) {
   return hash;
 }
 
-// Compute a simple color hash for an image buffer
-// This function preserves color information by not converting to grayscale.
-const COLOR_HASH_SIZE = 4;
-async function computeColorHash(buffer) {
-  const { data, info } = await sharp(buffer)
-    .resize(COLOR_HASH_SIZE, COLOR_HASH_SIZE, { fit: "fill" })
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  const numPixels = info.width * info.height;
-  let totalR = 0,
-    totalG = 0,
-    totalB = 0;
+const COLOR_FINGERPRINT = 2;
+async function computeColorFingerprint(buffer) {
+  // Resize image to COLOR_FINGERPRINT x COLOR_FINGERPRINT and get raw RGB data.
+  const { data, info } = await sharp(buffer).resize(COLOR_FINGERPRINT, COLOR_FINGERPRINT, { fit: "fill" }).raw().toBuffer({ resolveWithObject: true });
+
+  // Assume info.channels >= 3 (ignore alpha if present)
+  const pixels = [];
   for (let i = 0; i < data.length; i += info.channels) {
-    totalR += data[i];
-    totalG += data[i + 1];
-    totalB += data[i + 2];
+    pixels.push([data[i], data[i + 1], data[i + 2]]);
   }
-  const avgR = totalR / numPixels;
-  const avgG = totalG / numPixels;
-  const avgB = totalB / numPixels;
-  let hash = "";
-  for (let i = 0; i < data.length; i += info.channels) {
-    hash += data[i] > avgR ? "1" : "0";
-    hash += data[i + 1] > avgG ? "1" : "0";
-    hash += data[i + 2] > avgB ? "1" : "0";
-  }
-  return hash;
+  return pixels; // Array of length COLOR_FINGERPRINT*COLOR_FINGERPRINT, each element is [R, G, B]
 }
 
 // Compute the Hamming distance between two binary hash strings
@@ -602,6 +538,35 @@ function hammingDistance(hash1, hash2) {
   return distance;
 }
 
+function weightedColorDistance(color1, color2, lumWeight = 0.7) {
+  // Both color1 and color2 are arrays of [R, G, B] for each pixel.
+  if (color1.length !== color2.length) {
+    throw new Error("Color fingerprints must be of equal length");
+  }
+  let totalLumDiff = 0;
+  let totalColorDiff = 0;
+  for (let i = 0; i < color1.length; i++) {
+    const [R1, G1, B1] = color1[i];
+    const [R2, G2, B2] = color2[i];
+    // Compute luminance for each pixel (Rec. 709)
+    const L1 = 0.2126 * R1 + 0.7152 * G1 + 0.0722 * B1;
+    const L2 = 0.2126 * R2 + 0.7152 * G2 + 0.0722 * B2;
+    const lumDiff = Math.abs(L1 - L2);
+    // Compute average per-channel absolute difference for color
+    const colorDiff = (Math.abs(R1 - R2) + Math.abs(G1 - G2) + Math.abs(B1 - B2)) / 3;
+    totalLumDiff += lumDiff;
+    totalColorDiff += colorDiff;
+  }
+  // Average differences over all pixels
+  const avgLumDiff = totalLumDiff / color1.length;
+  const avgColorDiff = totalColorDiff / color1.length;
+  // Normalize differences (maximum difference per channel is 255)
+  const normLumDiff = avgLumDiff / 255;
+  const normColorDiff = avgColorDiff / 255;
+  // Weight luminance difference more heavily
+  return lumWeight * normLumDiff + (1 - lumWeight) * normColorDiff;
+}
+
 const cacheFilePath = path.join(__dirname, "fingerprintCache.json");
 
 // Global in-memory cache for image fingerprints.
@@ -613,12 +578,9 @@ fsPromises
   .readFile(cacheFilePath, "utf8")
   .then((data) => {
     fingerprintCache = JSON.parse(data);
-    console.log(
-      "[DEBUG] Fingerprint cache loaded from disk:",
-      fingerprintCache
-    );
+    console.log("[DEBUG] Fingerprint cache loaded from disk:", fingerprintCache);
   })
-  .catch((err) => {
+  .catch(() => {
     console.log("[DEBUG] No fingerprint cache found, starting fresh");
     fingerprintCache = {};
   });
@@ -626,169 +588,135 @@ fsPromises
 // Function to save the fingerprint cache to disk.
 async function saveFingerprintCache() {
   try {
-    await fsPromises.writeFile(
-      cacheFilePath,
-      JSON.stringify(fingerprintCache, null, 2)
-    );
+    await fsPromises.writeFile(cacheFilePath, JSON.stringify(fingerprintCache, null, 2));
   } catch (err) {
     console.error("Failed to save fingerprint cache:", err);
   }
 }
 
-// POST /check-similarity/:baseId – Check if an uploaded IPA image is similar to existing ones in the gallery.
-app.post(
-  "/check-similarity/:baseId",
-  upload.single("ipa"),
-  async (req, res) => {
-    const baseId = req.params.baseId;
-    try {
-      if (!req.file || !req.file.mimetype.startsWith("image/")) {
-        return res
-          .status(400)
-          .json({ error: "Invalid file or no file provided" });
-      }
-
-      // Downscale the image for efficient hashing
-      const downscaledBuffer = await sharp(req.file.buffer)
-        .resize(256, 256, { fit: "inside" })
-        .toBuffer();
-
-      // Optionally, save the downscaled image into a temporary directory
-      const tempFileName = path.join(tempDir, `temp-${Date.now()}.png`);
-      await fsPromises.writeFile(tempFileName, downscaledBuffer);
-
-      // Compute hash of the new IPA image
-      const newHash = await computeImageHash(downscaledBuffer);
-
-      // Check against existing IPA images in the gallery for this base
-      const { imagesDir } = getGalleryDirs(baseId);
-      if (!fingerprintCache[baseId]) {
-        fingerprintCache[baseId] = {};
-      }
-      const files = await fsPromises.readdir(imagesDir);
-      let minDistance = Infinity;
-      let updated = false;
-      for (const file of files) {
-        if (/^\d+\.(png|jpe?g|gif|webm)$/i.test(file)) {
-          // Assuming IPA images follow this naming
-          if (!fingerprintCache[baseId][file]) {
-            console.debug(
-              `[DEBUG] Cache miss for file ${file} in base ${baseId}. Computing fingerprint.`
-            );
-
-            const existingBuffer = await fsPromises.readFile(
-              path.join(imagesDir, file)
-            );
-            const existingHash = await computeImageHash(existingBuffer);
-            fingerprintCache[baseId][file] = existingHash;
-            updated = true;
-            console.debug(
-              `[DEBUG] Cached fingerprint for file ${file}: ${existingHash}`
-            );
-          } else {
-            console.debug(
-              `[DEBUG] Cache hit for file ${file} in base ${baseId}.`
-            );
-          }
-          const distance = hammingDistance(
-            newHash,
-            fingerprintCache[baseId][file]
-          );
-          console.debug(
-            `[DEBUG] Hamming distance for new image vs ${file}: ${distance}`
-          );
-
-          if (distance < minDistance) {
-            minDistance = distance;
-          }
-        }
-      }
-      if (updated) {
-        console.debug(
-          `[DEBUG] Fingerprint cache updated for base ${baseId}. Saving cache to disk.`
-        );
-        await saveFingerprintCache();
-      }
-      const threshold = (FINGERPRINT_SIZE * FINGERPRINT_SIZE) / 10; // 10% of the total fingerprint size
-      const isSimilar = minDistance <= threshold;
-      return res.json({ similar: isSimilar, minDistance });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ error: "Similarity check failed" });
-    }
+async function getCachedFingerprint(baseId, fileName) {
+  const { imagesDir } = getGalleryDirs(baseId);
+  if (!fingerprintCache[baseId]) {
+    fingerprintCache[baseId] = {};
   }
-);
+  if (!fingerprintCache[baseId][fileName]) {
+    const filePath = path.join(imagesDir, fileName);
+    const buffer = await fsPromises.readFile(filePath);
+    const shape = await computeImageHash(buffer);
+    // Use the new function to compute the raw color fingerprint
+    const color = await computeColorFingerprint(buffer);
+    fingerprintCache[baseId][fileName] = { shape, color };
+    await saveFingerprintCache();
+  }
+  return fingerprintCache[baseId][fileName];
+}
+
+// POST /check-similarity/:baseId – Check if an uploaded IPA image is similar to existing ones in the gallery.
+app.post("/check-similarity/:baseId", upload.single("ipa"), async (req, res) => {
+  const baseId = req.params.baseId;
+  try {
+    if (!req.file || !req.file.mimetype.startsWith("image/")) {
+      return res.status(400).json({ error: "Invalid file or no file provided" });
+    }
+
+    const downscaledBuffer = await sharp(req.file.buffer).resize(256, 256, { fit: "inside" }).toBuffer();
+
+    const tempFileName = path.join(tempDir, `temp-${Date.now()}.png`);
+    await fsPromises.writeFile(tempFileName, downscaledBuffer);
+
+    const newShapeHash = await computeImageHash(downscaledBuffer);
+    // Use new color fingerprint function
+    const newColorFingerprint = await computeColorFingerprint(downscaledBuffer);
+
+    const { imagesDir } = getGalleryDirs(baseId);
+    if (!fingerprintCache[baseId]) {
+      fingerprintCache[baseId] = {};
+    }
+    const files = await fsPromises.readdir(imagesDir);
+    let minShapeDistance = Infinity;
+    let minColorDistance = Infinity;
+    let minCombinedDistance = Infinity;
+    const shapeWeight = 0.4;
+    const lumWeight = 0.6;
+    const maxShape = SHAPE_FINGERPRINT * SHAPE_FINGERPRINT;
+
+    for (const file of files) {
+      if (/^\d+\.(png|jpe?g|gif|webm)$/i.test(file)) {
+        const cached = await getCachedFingerprint(baseId, file);
+        const shapeDistance = hammingDistance(newShapeHash, cached.shape) / maxShape;
+        const colorDistance = weightedColorDistance(newColorFingerprint, cached.color, lumWeight);
+        const combinedDistance = shapeWeight * shapeDistance + (1 - shapeWeight) * colorDistance;
+        if (shapeDistance < minShapeDistance) minShapeDistance = shapeDistance;
+        if (colorDistance < minColorDistance) minColorDistance = colorDistance;
+        if (combinedDistance < minCombinedDistance) minCombinedDistance = combinedDistance;
+      }
+    }
+    const threshold = (SHAPE_FINGERPRINT * SHAPE_FINGERPRINT + COLOR_FINGERPRINT * COLOR_FINGERPRINT * 3) / 20;
+    const isSimilar = minCombinedDistance <= threshold;
+    return res.json({
+      similar: isSimilar,
+      minCombinedDistance,
+      minShapeDistance,
+      minColorDistance,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Similarity check failed" });
+  }
+});
 
 // GET /similarity/:baseId/:refNumber – compute similarity between base and style/comp images
 app.get("/similarity/:baseId/:refNumber", async (req, res) => {
   const { baseId, refNumber } = req.params;
   try {
-    // Load the base image with caching
+    // Load the base image (assumed to be stored as baseId.png in baseImagesDir)
     const baseImagePath = path.join(baseImagesDir, `${baseId}.png`);
     if (!fs.existsSync(baseImagePath)) {
       return res.status(404).json({ error: "Base image not found" });
     }
-    if (!fingerprintCache[baseId]) {
-      fingerprintCache[baseId] = {};
-    }
-    let updated = false;
-    async function getFingerprint(filePath, key) {
-      if (fingerprintCache[baseId][key]) {
-        return fingerprintCache[baseId][key];
-      } else {
-        const buffer = await fsPromises.readFile(filePath);
-        const hash = await computeImageHash(buffer);
-        fingerprintCache[baseId][key] = hash;
-        updated = true;
-        return hash;
-      }
-    }
-    const baseKey = `${baseId}.png`;
-    const baseHash = await getFingerprint(baseImagePath, baseKey);
+    const baseBuffer = await fsPromises.readFile(baseImagePath);
+    const baseShapeHash = await computeImageHash(baseBuffer);
+    const baseColorFingerprint = await computeColorFingerprint(baseBuffer);
 
-    // Get gallery images directory for this base
+    // Define weighting factors
+    const shapeWeight = 0.4; // Equal weight for shape and color
+    const lumWeight = 0.6; // Weight luminance differences more heavily in color comparison
+
+    const maxShape = SHAPE_FINGERPRINT * SHAPE_FINGERPRINT;
+
     const { imagesDir } = getGalleryDirs(baseId);
 
-    // Load and cache the Style image
-    const styleImagePath = path.join(imagesDir, `${refNumber}-style.png`);
-    if (!fs.existsSync(styleImagePath)) {
-      return res.status(404).json({ error: "Style image not found" });
-    }
-    const styleKey = `${refNumber}-style.png`;
-    const styleHash = await getFingerprint(styleImagePath, styleKey);
-    const styleDistance = hammingDistance(baseHash, styleHash);
+    // For Style image:
+    const styleFile = `${refNumber}-style.png`;
+    const styleFingerprint = await getCachedFingerprint(baseId, styleFile);
+    const styleShapeDistance = hammingDistance(baseShapeHash, styleFingerprint.shape) / maxShape;
+    const styleColorDistance = weightedColorDistance(baseColorFingerprint, styleFingerprint.color, lumWeight);
+    const styleCombinedDistance = shapeWeight * styleShapeDistance + (1 - shapeWeight) * styleColorDistance;
 
-    // Load and cache the Comp image
-    const compImagePath = path.join(imagesDir, `${refNumber}-comp.png`);
-    if (!fs.existsSync(compImagePath)) {
-      return res.status(404).json({ error: "Comp image not found" });
-    }
-    const compKey = `${refNumber}-comp.png`;
-    const compHash = await getFingerprint(compImagePath, compKey);
-    const compDistance = hammingDistance(baseHash, compHash);
+    // For Comp image:
+    const compFile = `${refNumber}-comp.png`;
+    const compFingerprint = await getCachedFingerprint(baseId, compFile);
+    const compShapeDistance = hammingDistance(baseShapeHash, compFingerprint.shape) / maxShape;
+    const compColorDistance = weightedColorDistance(baseColorFingerprint, compFingerprint.color, lumWeight);
+    const compCombinedDistance = shapeWeight * compShapeDistance + (1 - shapeWeight) * compColorDistance;
 
-    // Load and cache the Both image
-    const bothImagePath = path.join(imagesDir, `${refNumber}-both.png`);
-    if (!fs.existsSync(bothImagePath)) {
+    // For Both image:
+    const bothFile = `${refNumber}-both.png`;
+    if (!fs.existsSync(path.join(imagesDir, bothFile))) {
       return res.status(404).json({ error: "Both image not found" });
     }
-    const bothKey = `${refNumber}-both.png`;
-    const bothHash = await getFingerprint(bothImagePath, bothKey);
 
-    // Compute distances between the Both image and the Style/Comp images
-    const bothDistanceStyle = hammingDistance(bothHash, styleHash);
-    const bothDistanceComp = hammingDistance(bothHash, compHash);
-
-    // If any new fingerprints were computed, save the cache to disk
-    if (updated) {
-      await saveFingerprintCache();
-    }
-    // Return the similarity scores to the client for further client-side processing
     return res.json({
-      styleDistance,
-      compDistance,
-      bothDistanceStyle,
-      bothDistanceComp,
+      style: {
+        shapeDistance: styleShapeDistance,
+        colorDistance: styleColorDistance,
+        combinedDistance: styleCombinedDistance,
+      },
+      comp: {
+        shapeDistance: compShapeDistance,
+        colorDistance: compColorDistance,
+        combinedDistance: compCombinedDistance,
+      },
     });
   } catch (err) {
     console.error(err);

@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // Global variable for the selected base gallery
 let selectedBase = "";
 let offset = 0;
@@ -74,74 +75,60 @@ async function loadBaseImages() {
   }
 }
 // Function to handle the deletion of a base gallery
-document
-  .getElementById("deleteBaseButton")
-  .addEventListener("click", async function () {
-    if (
-      confirm(
-        "Are you sure you want to delete this base gallery? This will delete every entry (images and captions) associated with it."
-      )
-    ) {
-      try {
-        // Send DELETE request to server to delete the selected base gallery
-        const response = await fetch(`/deleteGallery/${selectedBase}`, {
-          method: "DELETE",
-        });
-        const result = await response.json();
-        if (response.ok) {
-          alert("Gallery deleted successfully!");
-          // Reset to the default state if deletion was successful
-          selectedBase = "";
-          document.getElementById("floatingBaseImage").src = "";
-          document.getElementById("floatingBaseTitle").textContent =
-            "No Base Available";
-          document.getElementById("gallery").innerHTML = "";
-          loadBaseImages(); // Refresh the base image selector
-        } else {
-          alert("Failed to delete gallery: " + result.error);
-        }
-      } catch (err) {
-        alert("An error occurred while deleting the gallery.");
-        console.error("Delete gallery error:", err);
-      }
-    }
-  });
-// Close base upload modal logic
-document
-  .getElementById("baseUploadModal")
-  .addEventListener("click", function (e) {
-    if (e.target === this) {
-      document.getElementById("baseUploadModal").style.display = "none";
-    }
-  });
-// Handle new base gallery creation form submission
-document
-  .getElementById("baseUploadForm")
-  .addEventListener("submit", async function (e) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
+document.getElementById("deleteBaseButton").addEventListener("click", async function () {
+  if (confirm("Are you sure you want to delete this base gallery? This will delete every entry (images and captions) associated with it.")) {
     try {
-      const response = await fetch("/uploadBase", {
-        method: "POST",
-        body: formData,
+      // Send DELETE request to server to delete the selected base gallery
+      const response = await fetch(`/deleteGallery/${selectedBase}`, {
+        method: "DELETE",
       });
       const result = await response.json();
       if (response.ok) {
-        document.getElementById("baseUploadStatus").innerText =
-          "New base created: " + result.baseId;
-        form.reset();
-        document.getElementById("baseUploadModal").style.display = "none";
-        loadBaseImages(); // refresh the base selector
+        alert("Gallery deleted successfully!");
+        // Reset to the default state if deletion was successful
+        selectedBase = "";
+        document.getElementById("floatingBaseImage").src = "";
+        document.getElementById("floatingBaseTitle").textContent = "No Base Available";
+        document.getElementById("gallery").innerHTML = "";
+        loadBaseImages(); // Refresh the base image selector
       } else {
-        document.getElementById("baseUploadStatus").innerText =
-          "Error: " + result.error;
+        alert("Failed to delete gallery: " + result.error);
       }
     } catch (err) {
-      document.getElementById("baseUploadStatus").innerText =
-        "An error occurred";
+      alert("An error occurred while deleting the gallery.");
+      console.error("Delete gallery error:", err);
     }
-  });
+  }
+});
+// Close base upload modal logic
+document.getElementById("baseUploadModal").addEventListener("click", function (e) {
+  if (e.target === this) {
+    document.getElementById("baseUploadModal").style.display = "none";
+  }
+});
+// Handle new base gallery creation form submission
+document.getElementById("baseUploadForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+  try {
+    const response = await fetch("/uploadBase", {
+      method: "POST",
+      body: formData,
+    });
+    const result = await response.json();
+    if (response.ok) {
+      document.getElementById("baseUploadStatus").innerText = "New base created: " + result.baseId;
+      form.reset();
+      document.getElementById("baseUploadModal").style.display = "none";
+      loadBaseImages(); // refresh the base selector
+    } else {
+      document.getElementById("baseUploadStatus").innerText = "Error: " + result.error;
+    }
+  } catch (err) {
+    document.getElementById("baseUploadStatus").innerText = "An error occurred";
+  }
+});
 // Extend drop-zone handler to support URL drops
 document.querySelectorAll(".upload-item").forEach((dropZone) => {
   dropZone.addEventListener("dragover", (event) => {
@@ -150,9 +137,7 @@ document.querySelectorAll(".upload-item").forEach((dropZone) => {
   dropZone.addEventListener("drop", async (event) => {
     event.preventDefault();
     // Try to get a URL from the dropped data
-    let url =
-      event.dataTransfer.getData("text/uri-list") ||
-      event.dataTransfer.getData("text");
+    let url = event.dataTransfer.getData("text/uri-list") || event.dataTransfer.getData("text");
     const input = dropZone.querySelector('input[type="file"]');
     if (url && url.startsWith("http")) {
       try {
@@ -193,67 +178,59 @@ function toggleFloatingBaseImage() {
   }
 }
 // Image preview for upload items
-document
-  .querySelectorAll(".upload-item input[type='file']")
-  .forEach((input) => {
-    input.addEventListener("change", function (event) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-          let preview = input.parentElement.querySelector("img.preview");
-          if (!preview) {
-            preview = document.createElement("img");
-            preview.classList.add("preview");
-            input.parentElement.appendChild(preview);
-          }
-          preview.src = e.target.result;
-          preview.style.display = "block";
-          const label = input.parentElement.querySelector("label");
-          if (label) {
-            label.style.display = "none";
-          }
-        };
-        reader.readAsDataURL(file);
+document.querySelectorAll(".upload-item input[type='file']").forEach((input) => {
+  input.addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        let preview = input.parentElement.querySelector("img.preview");
+        if (!preview) {
+          preview = document.createElement("img");
+          preview.classList.add("preview");
+          input.parentElement.appendChild(preview);
+        }
+        preview.src = e.target.result;
+        preview.style.display = "block";
+        const label = input.parentElement.querySelector("label");
+        if (label) {
+          label.style.display = "none";
+        }
+      };
+      reader.readAsDataURL(file);
 
-        // If this is the IPA dropzone, trigger the similarity check.
-        if (input.parentElement.id === "ipa-dropzone") {
-          const formData = new FormData();
-          formData.append("ipa", file);
+      // If this is the IPA dropzone, trigger the similarity check.
+      if (input.parentElement.id === "ipa-dropzone") {
+        const formData = new FormData();
+        formData.append("ipa", file);
 
-          if (selectedBase) {
-            fetch(`/check-similarity/${selectedBase}`, {
-              method: "POST",
-              body: formData,
+        if (selectedBase) {
+          fetch(`/check-similarity/${selectedBase}`, {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.similar) {
+                showUploadWarning(`Warning: This image is very similar to an existing entry (distance: ${data.minCombinedDistance.toFixed(2)}).`);
+              }
             })
-              .then((response) => response.json())
-              .then((data) => {
-                if (data.similar) {
-                  showUploadWarning(
-                    `Warning: This image is very similar to an existing entry (distance: ${data.minDistance}).`
-                  );
-                }
-              })
-              .catch((err) => {
-                console.error("Similarity check error:", err);
-              });
-          }
+            .catch((err) => {
+              console.error("Similarity check error:", err);
+            });
         }
       }
-    });
+    }
   });
+});
 
 // Modal open/close for upload modal
-document
-  .querySelector(".open-upload-modal")
-  .addEventListener("click", function () {
-    document.getElementById("uploadModal").style.display = "flex";
-  });
-document
-  .querySelector(".close-upload-modal")
-  .addEventListener("click", function () {
-    document.getElementById("uploadModal").style.display = "none";
-  });
+document.querySelector(".open-upload-modal").addEventListener("click", function () {
+  document.getElementById("uploadModal").style.display = "flex";
+});
+document.querySelector(".close-upload-modal").addEventListener("click", function () {
+  document.getElementById("uploadModal").style.display = "none";
+});
 document.getElementById("uploadModal").addEventListener("click", function (e) {
   if (e.target === this) {
     document.getElementById("uploadModal").style.display = "none";
@@ -417,83 +394,72 @@ function showUploadWarning(message) {
   }, 4000);
 }
 
-document
-  .getElementById("uploadForm")
-  .addEventListener("submit", async function (event) {
-    event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
-    try {
-      const response = await fetch(`/upload/${selectedBase}`, {
-        method: "POST",
-        body: formData,
+document.getElementById("uploadForm").addEventListener("submit", async function (event) {
+  event.preventDefault();
+  const form = event.target;
+  const formData = new FormData(form);
+  try {
+    const response = await fetch(`/upload/${selectedBase}`, {
+      method: "POST",
+      body: formData,
+    });
+    const result = await response.json();
+    if (response.ok) {
+      document.getElementById("uploadStatus").innerText = "Upload successful! New entry ID: " + result.id;
+      form.reset();
+      document.querySelectorAll(".upload-item").forEach((item) => {
+        const label = item.querySelector("label");
+        if (label) label.style.display = "block";
+        const preview = item.querySelector("img.preview");
+        if (preview) {
+          preview.src = "";
+          preview.style.display = "none";
+        }
       });
-      const result = await response.json();
-      if (response.ok) {
-        document.getElementById("uploadStatus").innerText =
-          "Upload successful! New entry ID: " + result.id;
-        form.reset();
-        document.querySelectorAll(".upload-item").forEach((item) => {
-          const label = item.querySelector("label");
-          if (label) label.style.display = "block";
-          const preview = item.querySelector("img.preview");
-          if (preview) {
-            preview.src = "";
-            preview.style.display = "none";
-          }
-        });
-        offset = 0;
-        document.getElementById("gallery").innerHTML = "";
-        loadGallery();
-      } else {
-        document.getElementById("uploadStatus").innerText =
-          "Upload failed: " + result.error;
-      }
-    } catch (error) {
-      document.getElementById("uploadStatus").innerText =
-        "An error occurred during upload.";
+      offset = 0;
+      document.getElementById("gallery").innerHTML = "";
+      loadGallery();
+    } else {
+      document.getElementById("uploadStatus").innerText = "Upload failed: " + result.error;
     }
-  });
+  } catch (error) {
+    document.getElementById("uploadStatus").innerText = "An error occurred during upload.";
+  }
+});
 // Base image preview for the new base gallery modal
-document
-  .getElementById("baseImage")
-  .addEventListener("change", function (event) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        let preview = document.querySelector("#base-dropzone img.preview");
-        if (!preview) {
-          preview = document.createElement("img");
-          preview.classList.add("preview");
-          document.getElementById("base-dropzone").appendChild(preview);
-        }
-        preview.src = e.target.result;
-        preview.style.display = "block";
-        const label = document.querySelector("#base-dropzone label");
-        if (label) {
-          label.style.display = "none";
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  });
+document.getElementById("baseImage").addEventListener("change", function (event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      let preview = document.querySelector("#base-dropzone img.preview");
+      if (!preview) {
+        preview = document.createElement("img");
+        preview.classList.add("preview");
+        document.getElementById("base-dropzone").appendChild(preview);
+      }
+      preview.src = e.target.result;
+      preview.style.display = "block";
+      const label = document.querySelector("#base-dropzone label");
+      if (label) {
+        label.style.display = "none";
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+});
 async function loadGallery() {
   if (loading || selectedBase === "") return;
   loading = true;
   const gallery = document.getElementById("gallery");
   try {
-    const response = await fetch(
-      `/references/${selectedBase}?offset=${offset}&limit=${limit}`
-    );
+    const response = await fetch(`/references/${selectedBase}?offset=${offset}&limit=${limit}`);
     const data = await response.json();
     totalReferences = data.total;
     const references = data.references;
     for (const refNumber of references) {
       const caption = await fetchCaption(refNumber);
-      const truncatedCaption =
-        caption.split(" ").slice(0, 4).join(" ") +
-        (caption.split(" ").length > 4 ? "..." : "");
+      const truncatedCaption = caption.split(" ").slice(0, 4).join(" ") + (caption.split(" ").length > 4 ? "..." : "");
       const entry = document.createElement("div");
       entry.classList.add("entry");
       entry.innerHTML = `
@@ -530,24 +496,26 @@ async function loadGallery() {
         .then((data) => {
           const tagLabel = document.createElement("div");
           tagLabel.className = "similarity-tag";
-          // Apply intelligent weighing: give the base-to-Style distance a leeway by applying a weight factor.
-          const styleWeight = 1.2;
-          const weightedCombinedStyle =
-            (data.styleDistance * styleWeight + data.bothDistanceStyle) / 2;
-          const combinedComp = (data.compDistance + data.bothDistanceComp) / 2;
-          // If the weighted style average is greater than the comp average, the style preset has a heavier impact.
-          const label = weightedCombinedStyle > combinedComp ? "Style" : "Comp";
-          // Show only the label in the tag with proper styling.
-          tagLabel.innerHTML = `<span class="${label.toLowerCase()}-label">[${label}]</span>`;
-          // Attach the debug data as a tooltip.
-          tagLabel.title = `Weighted Style: ${weightedCombinedStyle.toFixed(
-            2
-          )} vs Comp: ${combinedComp.toFixed(2)}\nRaw: S: ${
-            data.styleDistance
-          }, BS: ${data.bothDistanceStyle}, C: ${data.compDistance}, BC: ${
-            data.bothDistanceComp
-          }`;
-          // Insert the tag label at the top of the entry
+
+          // Extract distances for Style and Comp
+          const styleShape = data.style.shapeDistance;
+          const styleColor = data.style.colorDistance;
+          const styleCombined = data.style.combinedDistance;
+
+          const compShape = data.comp.shapeDistance;
+          const compColor = data.comp.colorDistance;
+          const compCombined = data.comp.combinedDistance;
+
+          // Determine overall label based on lower combined distance
+          const label = styleCombined > compCombined ? "Style" : "Comp";
+
+          // Create a detailed tooltip with individual and combined distances
+          const tooltip =
+            `Has the strongest effect when used with this preset.\n` +
+            `Style: Combined ${styleCombined.toFixed(2)} (Shape ${styleShape.toFixed(2)}, Color ${styleColor.toFixed(2)})\n` +
+            `Comp: Combined ${compCombined.toFixed(2)} (Shape ${compShape.toFixed(2)}, Color ${compColor.toFixed(2)})\n`;
+
+          tagLabel.innerHTML = `<button class="similarity-button ${label.toLowerCase()}-button" title="${tooltip}">${label}</button>`;
           entry.insertBefore(tagLabel, entry.firstChild);
         })
         .catch((err) => {
@@ -559,10 +527,7 @@ async function loadGallery() {
     console.error("Error loading gallery:", error);
   }
   loading = false;
-  if (
-    offset < totalReferences &&
-    document.documentElement.scrollHeight <= window.innerHeight
-  ) {
+  if (offset < totalReferences && document.documentElement.scrollHeight <= window.innerHeight) {
     loadGallery();
   }
   if (offset >= totalReferences && observer) {

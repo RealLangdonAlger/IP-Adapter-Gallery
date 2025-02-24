@@ -119,7 +119,7 @@ header {
 .delete-button {
   position: absolute;
   top: 3px;
-  right: 3px;
+  right: 5px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -498,8 +498,7 @@ button:hover {
   border: 5px solid #0000;
   border-radius: 10px;
 
-  background: linear-gradient(#fff, #000) padding-box,
-    linear-gradient(var(--angle), #f00, #0f0, #00f) border-box;
+  background: linear-gradient(#fff, #000) padding-box, linear-gradient(var(--angle), #f00, #0f0, #00f) border-box;
   animation: 4s rotate linear infinite;
 }
 
@@ -531,23 +530,34 @@ button:hover {
   transition: opacity 1s ease-out;
 }
 
-/* Enhanced Similarity Tag Styling */
+/* Similarity Tag Styling */
 .similarity-tag {
   position: absolute;
-  top: 5px;
+  top: 3px;
   left: 5px;
-  background: #2e2e2e;
-  padding: 2px 6px;
+  z-index: 10;
+  pointer-events: auto; /* Allow interaction with the button */
+  /* No padding or background here so it doesn't affect layout */
+}
+
+/* Enhanced Similarity Button Styling */
+.similarity-button {
+  background-color: #2e2e2e;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 8px;
   font-size: 12px;
-  border-radius: 3px;
-  z-index: 2;
   cursor: default;
+  color: #fff;
+  outline: none;
 }
 
-.similarity-tag .style-label {
-  color: #aec6cf;
+.similarity-button.style-button {
+  border-color: #aec6cf;
+  background-color: #3a5f7d;
 }
 
-.similarity-tag .comp-label {
-  color: #ffb6c1;
+.similarity-button.comp-button {
+  border-color: #ffb6c1;
+  background-color: #a94442;
 }

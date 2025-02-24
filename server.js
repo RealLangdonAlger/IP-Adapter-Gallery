@@ -652,7 +652,7 @@ app.post("/check-similarity/:baseId", upload.single("ipa"), async (req, res) => 
         if (combinedDistance < minCombinedDistance) minCombinedDistance = combinedDistance;
       }
     }
-    const threshold = (SHAPE_FINGERPRINT * SHAPE_FINGERPRINT + COLOR_FINGERPRINT * COLOR_FINGERPRINT * 3) / 20;
+    const threshold = 0.1;
     const isSimilar = minCombinedDistance <= threshold;
     return res.json({
       similar: isSimilar,

@@ -7,7 +7,9 @@ body {
   margin: 0;
   padding: 20px;
 }
-h1, h2 {
+
+h1,
+h2 {
   color: #ffffff;
 }
 
@@ -19,6 +21,7 @@ header {
   gap: 10px;
   position: relative;
 }
+
 #baseSelect {
   padding: 5px;
   font-size: 16px;
@@ -27,6 +30,7 @@ header {
   background-color: #2e2e2e;
   color: #fff;
 }
+
 #newBaseButton {
   padding: 5px 10px;
   font-size: 16px;
@@ -36,6 +40,7 @@ header {
   color: #fff;
   cursor: pointer;
 }
+
 .open-upload-modal {
   background: transparent;
   border: none;
@@ -44,12 +49,14 @@ header {
   width: 24px;
   height: 24px;
 }
+
 .open-upload-modal svg {
   fill: #fff;
   width: 100%;
   height: 100%;
   transition: fill 0.2s;
 }
+
 .open-upload-modal:hover svg {
   fill: #0f0;
 }
@@ -62,6 +69,7 @@ header {
   gap: 10px;
   margin-top: 20px;
 }
+
 .entry {
   background: #1e1e1e;
   padding: 15px;
@@ -71,15 +79,18 @@ header {
   max-width: 600px;
   position: relative;
 }
+
 .entry-title {
   font-size: 18px;
   margin-bottom: 10px;
 }
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 5px;
 }
+
 .grid img {
   width: 128px;
   height: 128px;
@@ -88,9 +99,11 @@ header {
   cursor: pointer;
   transition: transform 0.2s;
 }
+
 .grid img:hover {
   transform: scale(1.1);
 }
+
 .overlay {
   position: absolute;
   background: rgba(0, 0, 0, 0.5);
@@ -102,6 +115,7 @@ header {
   left: 5px;
   z-index: 1;
 }
+
 .delete-button {
   position: absolute;
   top: 5px;
@@ -113,15 +127,18 @@ header {
   width: 24px;
   height: 24px;
 }
+
 .delete-button svg {
   fill: #fff;
   width: 100%;
   height: 100%;
   transition: fill 0.2s;
 }
+
 .delete-button:hover svg {
   fill: #f00;
 }
+
 .lightbox {
   display: none;
   position: fixed;
@@ -134,6 +151,7 @@ header {
   align-items: center;
   z-index: 10;
 }
+
 .lightbox img {
   max-width: 90%;
   max-height: 90%;
@@ -154,6 +172,7 @@ header {
   justify-content: center;
   align-items: center;
 }
+
 .upload-modal-content {
   background: #1e1e1e;
   padding: 30px;
@@ -166,6 +185,7 @@ header {
   align-items: center;
   position: relative;
 }
+
 .close-upload-modal {
   position: absolute;
   top: 10px;
@@ -176,15 +196,18 @@ header {
   width: 24px;
   height: 24px;
 }
+
 .close-upload-modal svg {
   fill: #fff;
   width: 100%;
   height: 100%;
   transition: fill 0.2s;
 }
+
 .close-upload-modal:hover svg {
   fill: #f00;
 }
+
 .upload-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -192,6 +215,7 @@ header {
   margin-bottom: 15px;
   justify-items: center;
 }
+
 .upload-item {
   border: 2px dashed #555;
   border-radius: 5px;
@@ -204,6 +228,7 @@ header {
   position: relative;
   background: transparent;
 }
+
 .upload-item label {
   position: absolute;
   z-index: 1;
@@ -213,6 +238,7 @@ header {
   width: 100%;
   pointer-events: none;
 }
+
 .upload-item input[type="file"] {
   opacity: 0;
   position: absolute;
@@ -220,12 +246,14 @@ header {
   height: 100%;
   cursor: pointer;
 }
+
 .upload-item img.preview {
   max-width: 100%;
   max-height: 100%;
   object-fit: cover;
   display: none;
 }
+
 /* Modernized caption input */
 #caption {
   width: 100%;
@@ -235,6 +263,7 @@ header {
   color: #fff;
   border-radius: 4px;
 }
+
 /* Button Styles */
 button {
   padding: 10px 20px;
@@ -245,6 +274,7 @@ button {
   border-radius: 5px;
   cursor: pointer;
 }
+
 button:hover {
   background-color: #444;
 }
@@ -259,10 +289,11 @@ button:hover {
   border: 1px solid #555;
   border-radius: 8px;
   z-index: 1000;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   font-family: Arial, sans-serif;
 }
+
 .floating-base-image-header {
   display: flex;
   justify-content: space-between;
@@ -271,10 +302,12 @@ button:hover {
   padding: 5px 10px;
   color: #fff;
 }
+
 .floating-base-image-header span {
   font-size: 16px;
   font-weight: bold;
 }
+
 .toggle-button {
   background: transparent;
   border: none;
@@ -282,17 +315,21 @@ button:hover {
   font-size: 14px;
   cursor: pointer;
 }
+
 .floating-base-image-content {
   display: none;
   padding: 10px;
   text-align: center;
 }
+
 .floating-base-image.expanded .floating-base-image-content {
   display: block;
 }
+
 .floating-base-image.expanded .toggle-button {
   color: #f00;
 }
+
 .base-image {
   width: 100%;
   max-width: 280px;
@@ -306,6 +343,7 @@ button:hover {
   padding: 10px;
   text-align: center;
 }
+
 .floating-base-image.expanded .floating-base-image-content {
   display: block;
 }
@@ -329,6 +367,7 @@ button:hover {
   cursor: pointer;
   transition: transform 0.2s, border-color 0.2s;
 }
+
 .base-thumb:hover {
   transform: scale(1.1);
   border-color: #0f0;
@@ -358,6 +397,7 @@ button:hover {
   margin-top: 5px;
   text-align: center;
 }
+
 #deleteBaseButton {
   padding: 8px 20px;
   width: 100%;
@@ -369,6 +409,7 @@ button:hover {
   cursor: pointer;
   transition: background-color 0.2s;
 }
+
 #deleteBaseButton:hover {
   background-color: #c0392b;
 }
@@ -383,15 +424,16 @@ button:hover {
   border: 1px solid #555;
   border-radius: 8px;
   z-index: 1000;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   overflow: hidden;
   font-family: Arial, sans-serif;
-  
+
   padding: 4px 10px;
   display: flex;
   align-items: center;
   gap: 12px;
 }
+
 #editUI button {
   background: none;
   font-weight: bold;
@@ -403,9 +445,11 @@ button:hover {
   transition: background 0.2s ease;
   margin: 0;
 }
+
 #editUI button:hover {
   background: #ccc;
 }
+
 #editUI label {
   color: #333;
   font-size: 12px;
@@ -415,6 +459,7 @@ button:hover {
   width: 150px;
   margin: 0;
 }
+
 #editUI input[type="color"] {
   border: none;
   background: transparent;
@@ -423,8 +468,10 @@ button:hover {
   height: 24px;
   padding: 0;
 }
+
 #editUI input[type="range"] {
   -webkit-appearance: none;
+  appearance: none;
   width: 100px;
   height: 4px;
   background: #ddd;
@@ -432,6 +479,7 @@ button:hover {
   outline: none;
   cursor: pointer;
 }
+
 #editUI input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 12px;
@@ -441,20 +489,17 @@ button:hover {
   cursor: pointer;
   transition: background 0.2s ease;
 }
+
 #editUI input[type="range"]::-webkit-slider-thumb:hover {
   background: #555;
 }
 
 #editingCanvas {
-  border: 5px solid #0000;      
+  border: 5px solid #0000;
   border-radius: 10px;
 
-  background: linear-gradient(#fff, #000) padding-box, linear-gradient(
-        var(--angle),
-        #f00,
-        #0f0,
-		#00f
-      ) border-box;
+  background: linear-gradient(#fff, #000) padding-box,
+    linear-gradient(var(--angle), #f00, #0f0, #00f) border-box;
   animation: 4s rotate linear infinite;
 }
 
@@ -468,4 +513,20 @@ button:hover {
   syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
+}
+
+/* Floating Warning Widget */
+#uploadWarningWidget {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(255, 165, 0, 0.9);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  z-index: 10000;
+  display: none;
+  opacity: 1;
+  transition: opacity 1s ease-out;
 }

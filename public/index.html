@@ -6,6 +6,7 @@
     <title>IP Adapter Gallery</title>
     <link rel="stylesheet" href="style.css" />
   </head>
+
   <body>
     <header>
       <h1>IP Adapter Gallery</h1>
@@ -16,29 +17,33 @@
         </svg>
       </button>
     </header>
-
     <!-- Floating Base Image Container -->
-	<div class="floating-base-image">
-	  <div class="floating-base-image-header" onclick="toggleFloatingBaseImage()">
-		<span id="floatingBaseTitle">Base Generation</span>
-		<button class="toggle-button" type="button">Show</button>
-	  </div>
-	  <div class="floating-base-image-content">
-		<!-- Base thumbnails appear here at the top -->
-		<div class="base-selector" id="baseSelector">
-		  <!-- Thumbnails (and Add New Base button) will be injected dynamically -->
-		</div>
-		<!-- The currently selected base image appears below the thumbnails -->
-		<img id="floatingBaseImage" src="" alt="Base Generation" class="base-image" />
-
-		<!-- Delete Gallery button -->
-		<div class="delete-gallery">
-		  <button id="deleteBaseButton">Delete This Gallery</button>
-		</div>
-	  </div>
-	</div>
-
-
+    <div class="floating-base-image">
+      <div
+        class="floating-base-image-header"
+        onclick="toggleFloatingBaseImage()"
+      >
+        <span id="floatingBaseTitle">Base Generation</span>
+        <button class="toggle-button" type="button">Show</button>
+      </div>
+      <div class="floating-base-image-content">
+        <!-- Base thumbnails appear here at the top -->
+        <div class="base-selector" id="baseSelector">
+          <!-- Thumbnails (and Add New Base button) will be injected dynamically -->
+        </div>
+        <!-- The currently selected base image appears below the thumbnails -->
+        <img
+          id="floatingBaseImage"
+          src=""
+          alt="Base Generation"
+          class="base-image"
+        />
+        <!-- Delete Gallery button -->
+        <div class="delete-gallery">
+          <button id="deleteBaseButton">Delete This Gallery</button>
+        </div>
+      </div>
+    </div>
     <!-- Fullscreen Upload Modal -->
     <div id="uploadModal" class="upload-modal">
       <div class="upload-modal-content">
@@ -81,53 +86,72 @@
         <div id="uploadStatus"></div>
       </div>
     </div>
-
     <!-- Modal for creating a new base gallery -->
-	<div id="baseUploadModal" class="upload-modal">
-	  <div class="upload-modal-content">
-		<h2>Create New Base Gallery</h2>
-		<form id="baseUploadForm">
-		  <div class="upload-item" id="base-dropzone">
-			<label>Base Image</label>
-			<input type="file" id="baseImage" name="baseImage" accept="image/*" required />
-			<img class="preview" alt="Preview" />
-		  </div>
-		  <br />
-		  <button type="submit">Create Base Gallery</button>
-		</form>
-		<div id="baseUploadStatus"></div>
-	  </div>
-	</div>
-
+    <div id="baseUploadModal" class="upload-modal">
+      <div class="upload-modal-content">
+        <h2>Create New Base Gallery</h2>
+        <form id="baseUploadForm">
+          <div class="upload-item" id="base-dropzone">
+            <label>Base Image</label>
+            <input
+              type="file"
+              id="baseImage"
+              name="baseImage"
+              accept="image/*"
+              required
+            />
+            <img class="preview" alt="Preview" />
+          </div>
+          <br />
+          <button type="submit">Create Base Gallery</button>
+        </form>
+        <div id="baseUploadStatus"></div>
+      </div>
+    </div>
     <div class="gallery" id="gallery"></div>
     <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-      <div id="overlayContainer" style="position: relative; display: inline-block;">
-        <img id="lightboxImg" style="display: block; max-width: 90vw; max-height: 90vh;" />
+      <div
+        id="overlayContainer"
+        style="position: relative; display: inline-block"
+      >
+        <img
+          id="lightboxImg"
+          style="display: block; max-width: 90vw; max-height: 90vh"
+        />
         <!-- Pre-created hidden canvas for edit mode -->
-        <canvas id="editingCanvas" style="display: none; position: absolute; top: 0; left: 0;"></canvas>
+        <canvas
+          id="editingCanvas"
+          style="display: none; position: absolute; top: 0; left: 0"
+        ></canvas>
       </div>
     </div>
-	
-	<!-- New Edit UI Container Floating Next to the Base Generation Selector -->
-    <div id="editUI" style="display: none;">
+    <!-- New Edit UI Container Floating Next to the Base Generation Selector -->
+    <div id="editUI" style="display: none">
       <button id="editImageButton" onclick="toggleEditMode(event)">
-         <svg id="editIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20">
-           <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-         </svg>
-       </button>
+        <svg
+          id="editIcon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+        >
+          <path
+            d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+          />
+        </svg>
+      </button>
       <div id="editControls">
-        <label>Color:
-          <input type="color" id="brushColor" value="#ff0000">
+        <label
+          >Color: <input type="color" id="brushColor" value="#ff0000" />
         </label>
-        <label>Size:
-          <input type="range" id="brushSize" min="1" max="50" value="10">
+        <label
+          >Size:
+          <input type="range" id="brushSize" min="1" max="50" value="10" />
         </label>
       </div>
     </div>
-
     <!-- Sentinel element for infinite scroll -->
     <div id="scrollSentinel"></div>
-
     <script src="script.js"></script>
   </body>
 </html>

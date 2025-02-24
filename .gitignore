@@ -133,3 +133,5 @@ dist
 /public/images_compressed
 /public/base_images
 /public/galleries
+/temp
+fingerprintCache.json

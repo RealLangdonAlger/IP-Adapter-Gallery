@@ -15,3 +15,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
+document.getElementById("filterColorButton").addEventListener("click", () => {
+  const filterColor = document.getElementById("filterColorPicker").value;
+  // Dynamically import and call the new filtered gallery loader
+  import("./gallery.js").then((module) => {
+    module.loadFilteredGallery(filterColor);
+  });
+});

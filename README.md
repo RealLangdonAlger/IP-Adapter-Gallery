@@ -1,4 +1,4 @@
-# IP Adapter Gallery
+# IP Adapter Gallery / Reference
 
 The IP Adapter Gallery is a reference and comparison tool designed for users of the IP Adapter ControlNet.
 
@@ -18,10 +18,13 @@ Populating the gallery is done manually for now.
   Enjoy enhanced upload flexibility by simply dragging and dropping image URLs into the upload fields. The system fetches and previews the image automatically.
 
 - **Enhanced Base Gallery Management:**  
-  Easily create new base galleries and, when needed, delete an entire base gallery (with all its entries) directly from the floating base panel.
+  Easily create new base galleries and, when needed, delete an entire base gallery (with all its entries) directly from the Toolbox.
 
 - **Improved Canvas Editing:**  
   The in-browser canvas editing tool now features an enhanced UI with a stylish overlay and live drawing controls, making temporary image tweaks even more intuitive.
+
+- **Color Filtering:**  
+  Use the new color filtering feature to find IPA images with a particular color tone. Simply select a color from the integrated color picker in the Toolbox and click "Apply" to update the gallery with entries whose style image fingerprints best match the chosen color.
 
 ## Features
 
@@ -39,10 +42,10 @@ Populating the gallery is done manually for now.
 - **User-Friendly Upload Interfaces:**
 
   - **Gallery Entry Upload:** Easily add new IPA reference entries (including the associated Style, Composition, and Both images) to a selected base gallery.
-  - **Base Gallery Creation:** Create a new base gallery by simply uploading a base image. The new gallery is automatically set up and added to the floating base image selector.
+  - **Base Gallery Creation:** Create a new base gallery by simply uploading a base image. The new gallery is automatically set up and added to the Toolbox.
 
 - **Interactive Base Selection & Management:**  
-  A floating panel displays a row of base image thumbnails (with an integrated “+” button for adding new bases and a delete option for complete gallery removal) that lets you switch between galleries at a glance.
+  A Toolbox displays a small thumbnail of the selected base image with a cog icon that expands to reveal additional options, including the base selector, full-sized base image (300px wide for easy drag-and-drop), and deletion controls.
 
 - **Canvas Editing:**  
   Activate a canvas overlay on IPA images for quick in-browser edits. Adjust brush color and size with intuitive controls to tweak images directly within the gallery view. These changes are temporary and perfect for making on-the-fly adjustments.
@@ -50,33 +53,31 @@ Populating the gallery is done manually for now.
 - **Automatic Similarity & Duplicate Checks:**  
   Prevent duplicate entries with an automatic similarity detection system that compares new uploads against existing images using advanced fingerprinting techniques.
 
+- **Color Filtering:**  
+  Filter gallery entries by a selected color. The integrated color picker in the Toolbox lets you choose a target color, and the system will display images whose style fingerprints are closest to that color—all while preserving infinite scroll functionality.
+
 ## Usage
 
 1. **Viewing Galleries:**  
-   On page load, the floating base image panel auto-detects available base images. Click on any base thumbnail to view its gallery. The gallery displays IPA images alongside their corresponding Style, Composition, and Both variants.
-
-   ![image](https://github.com/user-attachments/assets/18b5a08a-61ce-4ad3-b7e5-c445e09ed219)
-
-   The **IPA** image can be dragged directly into WebUI's ControlNet for ease-of-use. Likewise, the **Base** image can also be dragged into WebUI's prompt area to read all its parameters.
+   On page load, the Toolbox auto-detects available base images. Click on any base thumbnail to view its gallery. The gallery displays IPA images alongside their corresponding Style, Composition, and Both variants.
 
 2. **Uploading New Gallery Entries:**  
-   Click the upload button (next to the header) to open the upload modal. Drop in your _IPA_, _Style_, _Composition_, and '_Both_' images along with a caption. The drop zones now support drag & drop of image URLs, making uploads even more convenient.
-
-   ![image](https://github.com/user-attachments/assets/739c1383-c047-4c70-ada3-f12f00e7916b)
+   Click the upload button (next to the header) to open the upload modal. Drop in your _IPA_, _Style_, _Composition_, and _Both_ images along with a caption. The drop zones now support drag & drop of image URLs, making uploads even more convenient.
 
 3. **Creating a New Base Gallery:**  
-   In the floating base image panel, click the “+” thumbnail to open the “Create New Base Gallery” modal. Upload a base image to create a new gallery. The new base will automatically appear in the base selector.
+   In the Toolbox, click the “+” thumbnail to open the “Create New Base Gallery” modal. Upload a base image to create a new gallery. The new base will automatically appear in the base selector.
 
-   ![image](https://github.com/user-attachments/assets/b29dd317-4112-407f-8c3d-bf3267429a71)
+4. **Filtering by Color:**  
+   Within the Toolbox, use the color picker and "Apply" button to filter gallery entries by a chosen color. The gallery will update to display only the images whose style image fingerprints most closely match your selected color, and infinite scrolling will load additional matching entries.
 
-4. **Image Processing:**  
+5. **Image Processing:**  
    When an image is requested:
 
    - IPA images are delivered in their original form to maintain reproducibility.
    - Other images (Style, Composition, Both) are downscaled by 50% if a compressed version does not already exist.
 
-5. **Deleting Entries & Galleries:**  
-   Each gallery entry includes a delete button to remove individual entries. Additionally, the floating base panel now features an option to delete an entire base gallery, removing all associated images and captions.
+6. **Deleting Entries & Galleries:**  
+   Each gallery entry includes a delete button to remove individual entries. Additionally, the Toolbox now features an option to delete an entire base gallery, removing all associated images and captions.
 
 ## Setup
 

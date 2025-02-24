@@ -279,73 +279,12 @@ button:hover {
   background-color: #444;
 }
 
-/* Floating Base Image */
-.floating-base-image {
-  position: fixed;
-  top: 10px;
-  left: 10px;
-  width: 300px;
-  background: rgba(0, 0, 0, 0.9);
-  border: 1px solid #555;
-  border-radius: 8px;
-  z-index: 1000;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-  font-family: Arial, sans-serif;
-}
-
-.floating-base-image-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  cursor: pointer;
-  padding: 5px 10px;
-  color: #fff;
-}
-
-.floating-base-image-header span {
-  font-size: 16px;
-  font-weight: bold;
-}
-
 .toggle-button {
   background: transparent;
   border: none;
   color: #0f0;
   font-size: 14px;
   cursor: pointer;
-}
-
-.floating-base-image-content {
-  display: none;
-  padding: 10px;
-  text-align: center;
-}
-
-.floating-base-image.expanded .floating-base-image-content {
-  display: block;
-}
-
-.floating-base-image.expanded .toggle-button {
-  color: #f00;
-}
-
-.base-image {
-  width: 100%;
-  max-width: 280px;
-  border: 2px solid #555;
-  border-radius: 8px;
-}
-
-/* Base Selector inside Floating Base Image */
-.floating-base-image-content {
-  display: none;
-  padding: 10px;
-  text-align: center;
-}
-
-.floating-base-image.expanded .floating-base-image-content {
-  display: block;
 }
 
 /* Base Selector inside Floating Base Image Container */
@@ -418,7 +357,9 @@ button:hover {
 #editUI {
   position: fixed;
   top: 10px;
-  left: 320px;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, 0);
   max-height: 48px;
   background: #ffffff;
   border: 1px solid #555;
@@ -552,17 +493,125 @@ button:hover {
   outline: none;
 }
 
-.similarity-button.style-button {
+.similarity-button.s-button {
   border-color: #aec6cf;
   background-color: #3a5f7d;
 }
 
-.similarity-button.comp-button {
+.similarity-button.c-button {
   border-color: #ffb6c1;
   background-color: #a94442;
 }
 
-.similarity-button.flex-button {
+.similarity-button.f-button {
   border-color: #888;
   background-color: #555;
+}
+
+/* Toolbox Styles */
+.toolbox {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  max-width: 320px;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid #555;
+  border-top: 4px solid #777;
+  border-radius: 8px;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+
+.toolbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.toolbox-thumbnail {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border: 2px solid #555;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+.toggle-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.cog-icon {
+  width: 24px;
+  height: 24px;
+  fill: #fff;
+}
+
+.toolbox-content {
+  display: none;
+  padding: 5px;
+}
+
+.toolbox.expanded .toolbox-content {
+  display: block;
+}
+
+.toolbox-base-image {
+  width: 100%;
+  max-width: 300px;
+  border-top: 2px solid #555;
+  border-radius: 10px;
+}
+
+/* Filter Panel */
+#filterPanel {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 300px;
+  margin: 5px 0;
+  border-bottom: 2px solid #555;
+  border-radius: 10px;
+}
+
+#filterPanel input[type="color"] {
+  flex: 1;
+  height: 36px;
+  cursor: pointer;
+  background: transparent;
+  margin: 0 5px;
+  border: none;
+}
+
+#filterPanel input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 4px;
+}
+
+#filterPanel input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
+}
+
+#filterPanel button {
+  flex: 1;
+  background-color: #222;
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+  padding: 4px;
+  margin-left: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  text-align: center;
+}
+
+#filterPanel button:hover {
+  background-color: #333;
 }

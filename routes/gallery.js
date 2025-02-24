@@ -217,4 +217,98 @@ router.delete("/delete/:baseId/:id", async (req, res) => {
   }
 });
 
+router.get("/filterColor/:baseId", async (req, res) => {
+  const baseId = req.params.baseId;
+  const hexColor = req.query.color;
+  const offset = parseInt(req.query.offset) || 0;
+  const limit = parseInt(req.query.limit) || 20;
+
+  if (!hexColor) {
+    return res.status(400).json({ error: "Color parameter is required" });
+  }
+
+  console.log(`[DEBUG] GET /filterColor/${baseId}/${hexColor} called.`);
+  // Convert hex (e.g. "#RRGGBB") to RGB array
+  let targetRGB;
+  try {
+    const hex = hexColor.replace("#", "");
+    if (hex.length !== 6) throw new Error("Invalid hex length");
+    targetRGB = [parseInt(hex.substring(0, 2), 16), parseInt(hex.substring(2, 4), 16), parseInt(hex.substring(4, 6), 16)];
+  } catch (err) {
+    return res.status(400).json({ error: "Invalid color format" });
+  }
+
+  const { imagesDir } = getGalleryDirs(baseId);
+  let files;
+  try {
+    files = await fsPromises.readdir(imagesDir);
+  } catch (err) {
+    return res.status(500).json({ error: "Unable to read gallery images" });
+  }
+
+  // Only consider style images (filenames like "123-style.png")
+  const styleFiles = files.filter((file) => /^(\d+)-style\.(png|jpe?g)$/i.test(file));
+  const results = [];
+
+  for (const file of styleFiles) {
+    try {
+      const match = file.match(/^(\d+)-style\./);
+      if (match) {
+        const refNumber = match[1];
+
+        // Get Style image's fingerprint and compute its average color.
+        const styleCached = await getCachedFingerprint(baseId, file, imagesDir);
+        const stylePixels = styleCached.color;
+        let sumR = 0,
+          sumG = 0,
+          sumB = 0;
+        for (const pixel of stylePixels) {
+          sumR += pixel[0];
+          sumG += pixel[1];
+          sumB += pixel[2];
+        }
+        const count = stylePixels.length;
+        const styleAvg = [sumR / count, sumG / count, sumB / count];
+
+        // Compute average color for the corresponding Both image.
+        const bothFileName = `${refNumber}-both.png`;
+        let bothAvg;
+        if (files.includes(bothFileName)) {
+          const bothCached = await getCachedFingerprint(baseId, bothFileName, imagesDir);
+          const bothPixels = bothCached.color;
+          let bothSumR = 0,
+            bothSumG = 0,
+            bothSumB = 0;
+          for (const pixel of bothPixels) {
+            bothSumR += pixel[0];
+            bothSumG += pixel[1];
+            bothSumB += pixel[2];
+          }
+          const bothCount = bothPixels.length;
+          bothAvg = [bothSumR / bothCount, bothSumG / bothCount, bothSumB / bothCount];
+        } else {
+          // If no Both image, fall back to Style average.
+          bothAvg = styleAvg;
+        }
+
+        // Compute weighted average: 70% Style, 30% Both.
+        const weightedAvg = [0.7 * styleAvg[0] + 0.3 * bothAvg[0], 0.7 * styleAvg[1] + 0.3 * bothAvg[1], 0.7 * styleAvg[2] + 0.3 * bothAvg[2]];
+
+        // Compute Euclidean distance from the target color.
+        const distance = Math.sqrt(Math.pow(weightedAvg[0] - targetRGB[0], 2) + Math.pow(weightedAvg[1] - targetRGB[1], 2) + Math.pow(weightedAvg[2] - targetRGB[2], 2));
+
+        results.push({ refNumber, distance });
+      }
+    } catch (err) {
+      console.error("Error processing file", file, err);
+    }
+  }
+
+  // Sort results by increasing distance.
+  results.sort((a, b) => a.distance - b.distance);
+  const total = results.length;
+  const paginated = results.slice(offset, offset + limit).map((r) => r.refNumber);
+  return res.json({ references: paginated, total });
+});
+
 export default router;

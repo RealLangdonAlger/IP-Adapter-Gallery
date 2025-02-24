@@ -501,19 +501,26 @@ async function loadGallery() {
           const styleShape = data.style.shapeDistance;
           const styleColor = data.style.colorDistance;
           const styleCombined = data.style.combinedDistance;
+          const styleWeighted = styleShape / 2 + styleColor;
 
           const compShape = data.comp.shapeDistance;
           const compColor = data.comp.colorDistance;
           const compCombined = data.comp.combinedDistance;
+          const compWeighted = compShape + compColor / 2;
 
           // Determine overall label based on lower combined distance
-          const label = styleCombined > compCombined ? "Style" : "Comp";
+          const threshold = 0.1;
+          let label;
+          if (Math.abs(styleWeighted - compWeighted) < threshold) {
+            label = "Flex";
+          } else {
+            label = styleWeighted > compWeighted ? "Style" : "Comp";
+          }
 
           // Create a detailed tooltip with individual and combined distances
           const tooltip =
-            `Has the strongest effect when used with this preset.\n` +
-            `Style: Combined ${styleCombined.toFixed(2)} (Shape ${styleShape.toFixed(2)}, Color ${styleColor.toFixed(2)})\n` +
-            `Comp: Combined ${compCombined.toFixed(2)} (Shape ${compShape.toFixed(2)}, Color ${compColor.toFixed(2)})\n`;
+            `Impact on Style: Weighted ${styleWeighted.toFixed(2)} (Shape ${styleShape.toFixed(2)}, Color ${styleColor.toFixed(2)})\n` +
+            `Impact on Composition: Weighted ${compWeighted.toFixed(2)} (Shape ${compShape.toFixed(2)}, Color ${compColor.toFixed(2)})\n`;
 
           tagLabel.innerHTML = `<button class="similarity-button ${label.toLowerCase()}-button" title="${tooltip}">${label}</button>`;
           entry.insertBefore(tagLabel, entry.firstChild);

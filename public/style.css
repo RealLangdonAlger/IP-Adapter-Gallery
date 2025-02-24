@@ -561,3 +561,8 @@ button:hover {
   border-color: #ffb6c1;
   background-color: #a94442;
 }
+
+.similarity-button.flex-button {
+  border-color: #888;
+  background-color: #555;
+}

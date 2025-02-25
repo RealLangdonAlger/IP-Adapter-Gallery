@@ -165,9 +165,9 @@ export async function loadFilteredGallery(filterColor) {
           const threshold = 0.1;
           let label;
           if (Math.abs(styleWeighted - compWeighted) < threshold) {
-            label = "Flex";
+            label = "F";
           } else {
-            label = styleWeighted > compWeighted ? "Style" : "Comp";
+            label = styleWeighted > compWeighted ? "S" : "C";
           }
           const tooltip =
             `Impact on Style: Weighted ${styleWeighted.toFixed(2)} (Shape ${styleShape.toFixed(2)}, Color ${styleColor.toFixed(2)})\n` +

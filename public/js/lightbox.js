@@ -5,7 +5,7 @@ export function openLightbox(src) {
   removeEditingCanvas();
   lightbox.style.display = "flex";
   const editUI = document.getElementById("editUI");
-  if (src.includes("/ipa")) {
+  if (src.includes("/ipa") || src.includes("/character")) {
     editUI.style.display = "flex";
   } else {
     editUI.style.display = "none";

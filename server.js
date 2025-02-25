@@ -24,6 +24,9 @@ app.use("/", baseGalleryRouter);
 app.use("/", galleryRouter);
 app.use("/", similarityRouter);
 
+// Serve galleries directory to access metadata.json
+app.use("/galleries", express.static(path.join(__dirname, "public", "galleries")));
+
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });

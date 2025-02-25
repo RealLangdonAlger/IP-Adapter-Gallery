@@ -75,8 +75,75 @@ export function initUpload() {
     });
   });
 
+  // NEW: Toggle upload fields based on gallery type
+  function updateUploadModalFields() {
+    const isCharacterGallery = state.galleryType === "character";
+
+    // Toggle visibility
+    document.getElementById("ipaUploadFields").style.display = isCharacterGallery ? "none" : "block";
+    document.getElementById("characterUploadField").style.display = isCharacterGallery ? "block" : "none";
+
+    // Handle required attributes for IPA fields
+    const ipaFields = ["ipa", "style", "comp", "both"];
+    ipaFields.forEach((name) => {
+      const input = document.querySelector(`input[name="${name}"]`);
+      if (input) input.required = !isCharacterGallery;
+    });
+
+    // Handle required attribute for character upload field
+    const characterInput = document.querySelector('input[name="character"]');
+    if (characterInput) characterInput.required = isCharacterGallery;
+  }
+
+  updateUploadModalFields();
+
+  // When handling file input change events, only run similarity check in IPA mode.
+  document.querySelectorAll(".upload-item input[type='file']").forEach((input) => {
+    input.addEventListener("change", function (event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          let preview = input.parentElement.querySelector("img.preview");
+          if (!preview) {
+            preview = document.createElement("img");
+            preview.classList.add("preview");
+            input.parentElement.appendChild(preview);
+          }
+          preview.src = e.target.result;
+          preview.style.display = "block";
+          const label = input.parentElement.querySelector("label");
+          if (label) {
+            label.style.display = "none";
+          }
+        };
+        reader.readAsDataURL(file);
+
+        // Only trigger similarity check for IPA dropzone in IPA mode.
+        if (input.parentElement.id === "ipa-dropzone" && state.selectedBase && state.galleryType === "ipa") {
+          const formData = new FormData();
+          formData.append("ipa", file);
+          fetch(`/check-similarity/${state.selectedBase}`, {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.similar) {
+                showUploadWarning(`Warning: This image is very similar to an existing entry (distance: ${data.minCombinedDistance.toFixed(2)}).`);
+              }
+            })
+            .catch((err) => {
+              console.error("Similarity check error:", err);
+            });
+        }
+      }
+    });
+  });
+
   // Upload modal open/close handlers.
   document.querySelector(".open-upload-modal").addEventListener("click", function () {
+    updateUploadModalFields(); // Apply correct required fields
     document.getElementById("uploadModal").style.display = "flex";
   });
   document.querySelector(".close-upload-modal").addEventListener("click", function () {
@@ -93,14 +160,18 @@ export function initUpload() {
     event.preventDefault();
     const form = event.target;
     const formData = new FormData(form);
+
     try {
       const response = await fetch(`/upload/${state.selectedBase}`, {
         method: "POST",
         body: formData,
       });
       const result = await response.json();
+
       if (response.ok) {
         document.getElementById("uploadStatus").innerText = "Upload successful! New entry ID: " + result.id;
+
+        // Reset form and previews
         form.reset();
         document.querySelectorAll(".upload-item").forEach((item) => {
           const label = item.querySelector("label");
@@ -111,9 +182,11 @@ export function initUpload() {
             preview.style.display = "none";
           }
         });
+
         state.offset = 0;
         document.getElementById("gallery").innerHTML = "";
-        // Dynamically import gallery module to reload the gallery.
+
+        // Reload gallery after upload
         import("./gallery.js").then((module) => {
           module.loadGallery();
         });

@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import sharp from "sharp";
 import { fileURLToPath } from "url";
-import { baseImagesDir, getGalleryDirs, getCompressedDir } from "../utils/galleryUtils.js";
+import { baseImagesDir, getGalleryDirs, getCompressedDir, galleriesDir } from "../utils/galleryUtils.js";
 import { ensureDir } from "../utils/fsUtils.js";
 
 const router = express.Router();
@@ -58,7 +58,12 @@ router.post("/uploadBase", upload.single("baseImage"), async (req, res) => {
     // Create empty gallery folders for the new base.
     getGalleryDirs(newBaseId);
     getCompressedDir(newBaseId);
-    console.log(`[DEBUG] New base gallery created: ${newBaseId}`);
+
+    // NEW: Save gallery metadata (galleryType)
+    const galleryType = req.body.galleryType || "ipa";
+    const metadata = { galleryType };
+    await fsPromises.writeFile(path.join(galleriesDir, newBaseId, "metadata.json"), JSON.stringify(metadata, null, 2));
+    console.log(`[DEBUG] New base gallery created: ${newBaseId} with type ${galleryType}`);
     res.json({
       message: "Base gallery created",
       baseId: newBaseId,
@@ -74,31 +79,34 @@ router.post("/uploadBase", upload.single("baseImage"), async (req, res) => {
 router.delete("/deleteGallery/:baseId", async (req, res) => {
   const baseId = req.params.baseId;
   console.log(`[DEBUG] DELETE /deleteGallery/${baseId} called.`);
+
   try {
-    const { imagesDir, captionsDir } = getGalleryDirs(baseId);
-    const compDir = getCompressedDir(baseId);
+    const compDir = getCompressedDir(baseId); // Compressed images directory
+    const baseGalleryDir = path.join(galleriesDir, baseId); // Main gallery folder
+
     // Delete the base image file.
     const baseImagePath = path.join(baseImagesDir, `${baseId}.png`);
     if (fs.existsSync(baseImagePath)) {
-      await fsPromises.unlink(baseImagePath);
+      await fs.promises.unlink(baseImagePath);
       console.log(`[DEBUG] Deleted base image: ${baseImagePath}`);
     }
-    // Delete all gallery entry files.
-    const imageFiles = await fsPromises.readdir(imagesDir);
-    for (const file of imageFiles) {
-      await fsPromises.unlink(path.join(imagesDir, file)).catch(() => {});
-      console.log(`[DEBUG] Deleted gallery file: ${file}`);
+
+    // ✅ Delete the entire gallery folder (images, captions, metadata.json)
+    if (fs.existsSync(baseGalleryDir)) {
+      await fs.promises.rm(baseGalleryDir, { recursive: true, force: true });
+      console.log(`[DEBUG] Deleted gallery folder: ${baseGalleryDir}`);
+    } else {
+      console.log(`[DEBUG] Gallery folder not found: ${baseGalleryDir}`);
     }
-    const captionFiles = await fsPromises.readdir(captionsDir);
-    for (const file of captionFiles) {
-      await fsPromises.unlink(path.join(captionsDir, file)).catch(() => {});
-      console.log(`[DEBUG] Deleted caption file: ${file}`);
+
+    // ✅ Delete the compressed images directory
+    if (fs.existsSync(compDir)) {
+      await fs.promises.rm(compDir, { recursive: true, force: true });
+      console.log(`[DEBUG] Deleted compressed images: ${compDir}`);
+    } else {
+      console.log(`[DEBUG] Compressed images folder not found: ${compDir}`);
     }
-    // Remove the directories.
-    await fsPromises.rmdir(imagesDir, { recursive: true });
-    await fsPromises.rmdir(captionsDir, { recursive: true });
-    await fsPromises.rmdir(compDir, { recursive: true });
-    console.log(`[DEBUG] Deleted gallery directories for base ${baseId}`);
+
     res.json({ message: `Gallery for base ${baseId} deleted successfully.` });
   } catch (err) {
     console.error(err);

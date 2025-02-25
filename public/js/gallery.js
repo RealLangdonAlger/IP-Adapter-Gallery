@@ -14,6 +14,19 @@ export async function loadGallery() {
   try {
     const response = await fetch(`/references/${state.selectedBase}?offset=${state.offset}&limit=${state.limit}`);
     const data = await response.json();
+    if (data.galleryType) {
+      state.galleryType = data.galleryType;
+    } else {
+      state.galleryType = "ipa";
+    }
+
+    // Disable "Lookup By Color" for Character Galleries
+    if (state.galleryType === "character") {
+      filterColorButton.disabled = true;
+    } else {
+      filterColorButton.disabled = false;
+    }
+
     state.totalReferences = data.total;
     const references = data.references;
     for (const refNumber of references) {
@@ -22,7 +35,21 @@ export async function loadGallery() {
       const truncatedCaption = words.slice(0, 4).join(" ") + (words.length > 4 ? "..." : "");
       const entry = document.createElement("div");
       entry.classList.add("entry");
-      entry.innerHTML = `
+      if (state.galleryType === "character") {
+        entry.classList.add("character-entry");
+        entry.innerHTML = `
+               <button class="delete-button" data-ref="${refNumber}" title="Delete">
+                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M3 6h18v2H3zm2 3h14v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V9zm3 2v8h2v-8H8zm4 0v8h2v-8h-2z"/>
+                  </svg>
+               </button>
+               <div class="entry-title" title="${caption}">${truncatedCaption}</div>
+               <div>
+                 <img src="/get-image/${state.selectedBase}/${refNumber}/character" loading="lazy" class="grid-image">
+               </div>
+             `;
+      } else {
+        entry.innerHTML = `
         <button class="delete-button" data-ref="${refNumber}" title="Delete">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M3 6h18v2H3zm2 3h14v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V9zm3 2v8h2v-8H8zm4 0v8h2v-8h-2z"/>
@@ -48,6 +75,7 @@ export async function loadGallery() {
           </div>
         </div>
       `;
+      }
       gallery.appendChild(entry);
       entry.querySelectorAll("img.grid-image").forEach((img) => {
         img.addEventListener("click", () => openLightbox(img.src));
@@ -57,34 +85,36 @@ export async function loadGallery() {
         deleteEntry(deleteButton, refNumber);
       });
 
-      // Fetch similarity info and add a similarity tag.
-      fetch(`/similarity/${state.selectedBase}/${refNumber}`)
-        .then((response) => response.json())
-        .then((data) => {
-          const tagLabel = document.createElement("div");
-          tagLabel.className = "similarity-tag";
-          const styleShape = data.style.shapeDistance;
-          const styleColor = data.style.colorDistance;
-          const compShape = data.comp.shapeDistance;
-          const compColor = data.comp.colorDistance;
-          const styleWeighted = styleShape / 2 + styleColor;
-          const compWeighted = compShape + compColor / 2;
-          const threshold = 0.1;
-          let label;
-          if (Math.abs(styleWeighted - compWeighted) < threshold) {
-            label = "F";
-          } else {
-            label = styleWeighted > compWeighted ? "S" : "C";
-          }
-          const tooltip =
-            `Impact on Style: Weighted ${styleWeighted.toFixed(2)} (Shape ${styleShape.toFixed(2)}, Color ${styleColor.toFixed(2)})\n` +
-            `Impact on Composition: Weighted ${compWeighted.toFixed(2)} (Shape ${compShape.toFixed(2)}, Color ${compColor.toFixed(2)})\n`;
-          tagLabel.innerHTML = `<button class="similarity-button ${label.toLowerCase()}-button" title="${tooltip}">${label}</button>`;
-          entry.insertBefore(tagLabel, entry.firstChild);
-        })
-        .catch((err) => {
-          console.error("Failed to fetch similarity scores:", err);
-        });
+      // Only add similarity tags in IPA mode.
+      if (state.galleryType === "ipa") {
+        fetch(`/similarity/${state.selectedBase}/${refNumber}`)
+          .then((response) => response.json())
+          .then((data) => {
+            const tagLabel = document.createElement("div");
+            tagLabel.className = "similarity-tag";
+            const styleShape = data.style.shapeDistance;
+            const styleColor = data.style.colorDistance;
+            const compShape = data.comp.shapeDistance;
+            const compColor = data.comp.colorDistance;
+            const styleWeighted = styleShape / 2 + styleColor;
+            const compWeighted = compShape + compColor / 2;
+            const threshold = 0.1;
+            let label;
+            if (Math.abs(styleWeighted - compWeighted) < threshold) {
+              label = "F";
+            } else {
+              label = styleWeighted > compWeighted ? "S" : "C";
+            }
+            const tooltip =
+              `Impact on Style: Weighted ${styleWeighted.toFixed(2)} (Shape ${styleShape.toFixed(2)}, Color ${styleColor.toFixed(2)})\n` +
+              `Impact on Composition: Weighted ${compWeighted.toFixed(2)} (Shape ${compShape.toFixed(2)}, Color ${compColor.toFixed(2)})\n`;
+            tagLabel.innerHTML = `<button class="similarity-button ${label.toLowerCase()}-button" title="${tooltip}">${label}</button>`;
+            entry.insertBefore(tagLabel, entry.firstChild);
+          })
+          .catch((err) => {
+            console.error("Failed to fetch similarity scores:", err);
+          });
+      }
     }
     state.offset += state.limit;
   } catch (error) {

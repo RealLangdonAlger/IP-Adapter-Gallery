@@ -32,7 +32,7 @@
         <div class="base-selector" id="baseSelector"></div>
         <img id="toolboxBaseImage" src="" alt="Base Image" class="toolbox-base-image" draggable="true" />
         <div id="filterPanel">
-          <button id="filterColorButton">Lookup By Color</button>
+          <button id="filterColorButton" title="Will try to find IPA reference images that produce the specified hue when used with Style Transfer">Lookup By Color</button>
           <input type="color" id="filterColorPicker" value="#770000" />
         </div>
         <div class="delete-gallery">
@@ -50,25 +50,36 @@
         </button>
         <h2>Upload New Entry</h2>
         <form id="uploadForm">
-          <div class="upload-grid">
-            <div class="upload-item" id="ipa-dropzone">
-              <label>IP-A Reference Image</label>
-              <input type="file" name="ipa" accept="image/*" required />
-              <img class="preview" alt="Preview" />
+          <!-- IPA Reference Gallery fields -->
+          <div id="ipaUploadFields">
+            <div class="upload-grid">
+              <div class="upload-item" id="ipa-dropzone">
+                <label>IP-A Reference Image</label>
+                <input type="file" name="ipa" accept="image/*" required />
+                <img class="preview" alt="Preview" />
+              </div>
+              <div class="upload-item" id="style-dropzone">
+                <label>Style Image</label>
+                <input type="file" name="style" accept="image/*" required />
+                <img class="preview" alt="Preview" />
+              </div>
+              <div class="upload-item" id="comp-dropzone">
+                <label>Comp Image</label>
+                <input type="file" name="comp" accept="image/*" required />
+                <img class="preview" alt="Preview" />
+              </div>
+              <div class="upload-item" id="both-dropzone">
+                <label>Both Image</label>
+                <input type="file" name="both" accept="image/*" required />
+                <img class="preview" alt="Preview" />
+              </div>
             </div>
-            <div class="upload-item" id="style-dropzone">
-              <label>Style Image</label>
-              <input type="file" name="style" accept="image/*" required />
-              <img class="preview" alt="Preview" />
-            </div>
-            <div class="upload-item" id="comp-dropzone">
-              <label>Comp Image</label>
-              <input type="file" name="comp" accept="image/*" required />
-              <img class="preview" alt="Preview" />
-            </div>
-            <div class="upload-item" id="both-dropzone">
-              <label>Both Image</label>
-              <input type="file" name="both" accept="image/*" required />
+          </div>
+          <!-- Character Reference Library upload field (initially hidden) -->
+          <div id="characterUploadField" style="display: none">
+            <div class="upload-item" id="character-dropzone">
+              <label>Character Image</label>
+              <input type="file" name="character" accept="image/*" required />
               <img class="preview" alt="Preview" />
             </div>
           </div>
@@ -91,6 +102,18 @@
             <label>Base Image</label>
             <input type="file" id="baseImage" name="baseImage" accept="image/*" required />
             <img class="preview" alt="Preview" />
+          </div>
+          <br />
+          <div>
+            <!-- Modernized Gallery Type Toggle Switch -->
+            <div class="gallery-type-toggle">
+              <input type="checkbox" id="galleryTypeToggle" name="galleryType" />
+              <label for="galleryTypeToggle">
+                <span class="toggle-option ipa" title="Structured gallery of 2x2 grids for IPA references">IPA Reference</span>
+                <span class="toggle-slider"></span>
+                <span class="toggle-option character" title="Simple gallery for character references">Character</span>
+              </label>
+            </div>
           </div>
           <br />
           <button type="submit">Create Base Gallery</button>

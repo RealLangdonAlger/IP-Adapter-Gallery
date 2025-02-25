@@ -287,16 +287,23 @@ button:hover {
   cursor: pointer;
 }
 
+/* Container for the base thumbnail and label */
+.base-thumb-container {
+  position: relative; /* Ensure label is positioned relative to this */
+  display: inline-block;
+  margin: 2px;
+}
+
 /* Base Selector inside Floating Base Image Container */
 .base-selector {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 5px;
-  margin-bottom: 10px;
+  gap: 3px;
+  margin-bottom: 5px;
 }
 
-/* Base thumbnail styling */
+/* Thumbnail Image */
 .base-thumb {
   width: 60px;
   height: 60px;
@@ -312,8 +319,25 @@ button:hover {
   border-color: #0f0;
 }
 
+/* Label for gallery type */
+.gallery-type-label {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 10px;
+  padding: 3px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  pointer-events: none;
+  z-index: 1; /* Ensure it appears above the thumbnail */
+}
+
 /* New Base thumbnail (Add New Base button) */
 .new-base-thumb {
+  width: 60px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -323,6 +347,12 @@ button:hover {
   border: 2px dashed #555;
   border-radius: 4px;
   cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.new-base-thumb:hover {
+  transform: scale(1.1);
+  border-color: #0f0;
 }
 
 #base-dropzone {
@@ -574,7 +604,7 @@ button:hover {
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 300px;
+  max-width: 310px;
   margin: 5px 0;
   border-bottom: 2px solid #555;
   border-radius: 10px;
@@ -614,4 +644,122 @@ button:hover {
 
 #filterPanel button:hover {
   background-color: #333;
+}
+
+/* Character Gallery Entry */
+.character-entry {
+  background: #1e1e1e;
+  padding: 5px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  max-width: 300px; /* Match grid image size */
+  position: relative;
+}
+
+.character-entry img {
+  width: 256px; /* Consistent size */
+  height: 256px;
+  object-fit: cover; /* Crop to fit */
+  border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.character-entry img:hover {
+  transform: scale(1.1); /* Zoom on hover */
+}
+
+/* Consistent Delete Button */
+.character-entry .delete-button {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.character-entry .delete-button svg {
+  fill: #fff;
+  width: 100%;
+  height: 100%;
+  transition: fill 0.2s;
+}
+
+.character-entry .delete-button:hover svg {
+  fill: #f00;
+}
+
+.character-entry .entry-title {
+  font-size: 16px;
+  margin-top: 5px;
+  color: #ccc;
+}
+
+/* Gallery Type Toggle Switch */
+.gallery-type-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.gallery-type-toggle input[type="checkbox"] {
+  display: none; /* Hide default checkbox */
+}
+
+.gallery-type-toggle label {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 200px;
+  height: 40px;
+  background: #2e2e2e;
+  border-radius: 20px;
+  cursor: pointer;
+  border: 2px solid #555;
+  user-select: none;
+  transition: background 0.3s ease;
+  overflow: hidden; /* Prevents overflow issues */
+  box-sizing: border-box;
+}
+
+.gallery-type-toggle .toggle-option {
+  width: 50%;
+  text-align: center;
+  z-index: 2;
+  font-size: 12px;
+  font-weight: bold;
+  color: #ccc;
+}
+
+.gallery-type-toggle .toggle-slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(50% - 4px); /* Adjust for borders */
+  height: calc(100% - 4px);
+  background: #c1e1c1;
+  border-radius: 16px;
+  transition: left 0.3s ease, background 0.3s ease;
+  box-sizing: border-box;
+}
+
+/* Toggle to Character */
+.gallery-type-toggle input[type="checkbox"]:checked + label .toggle-slider {
+  left: calc(50% + 2px); /* Precise positioning */
+  background: #fac898;
+}
+
+/* Change text color on active side */
+.gallery-type-toggle input[type="checkbox"]:checked + label .toggle-option.character {
+  color: #333;
+}
+
+.gallery-type-toggle input[type="checkbox"]:not(:checked) + label .toggle-option.ipa {
+  color: #333;
 }

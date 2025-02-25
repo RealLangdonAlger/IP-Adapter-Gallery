@@ -7,53 +7,68 @@ export async function loadBaseImages() {
     const baseList = await response.json();
     const baseSelector = document.getElementById("baseSelector");
     baseSelector.innerHTML = "";
-    const toolboxThumbnail = document.getElementById("toolboxThumbnail");
-    const toolboxBaseImage = document.getElementById("toolboxBaseImage");
-    const deleteBaseButton = document.getElementById("deleteBaseButton");
-    const uploadButton = document.querySelector(".open-upload-modal");
 
-    if (baseList.length === 0) {
-      baseSelector.innerHTML = "";
-      toolboxThumbnail.style.display = "none";
-      toolboxBaseImage.style.display = "none";
-      deleteBaseButton.style.display = "none";
-      uploadButton.style.display = "none";
-      return;
-    } else {
-      uploadButton.style.display = "block";
-      toolboxThumbnail.style.display = "block";
-      toolboxBaseImage.style.display = "block";
-      deleteBaseButton.style.display = "block";
-    }
+    for (const base of baseList) {
+      // Fetch metadata for each base
+      const metadataResponse = await fetch(`/galleries/${base.baseId}/metadata.json`);
+      let galleryType = "ipa"; // Default to IPA
+      if (metadataResponse.ok) {
+        const metadata = await metadataResponse.json();
+        galleryType = metadata.galleryType || "ipa";
+      }
 
-    baseList.forEach((base) => {
+      // Create thumbnail container
+      const thumbContainer = document.createElement("div");
+      thumbContainer.classList.add("base-thumb-container");
+
+      // Thumbnail Image
       const thumb = document.createElement("img");
       thumb.src = base.url;
       thumb.alt = base.baseId;
       thumb.classList.add("base-thumb");
       thumb.dataset.baseId = base.baseId;
+
+      // Gallery Type Label
+      const typeLabel = document.createElement("div");
+      typeLabel.classList.add("gallery-type-label");
+      typeLabel.textContent = galleryType === "character" ? "CHR" : "IPA";
+
+      // Append thumbnail and label to container
+      thumbContainer.appendChild(thumb);
+      thumbContainer.appendChild(typeLabel);
+      baseSelector.appendChild(thumbContainer);
+
+      // Add click handler
       thumb.addEventListener("click", () => {
         state.selectedBase = base.baseId;
-        toolboxThumbnail.src = base.url;
-        toolboxBaseImage.src = base.url;
+        document.getElementById("toolboxThumbnail").src = base.url;
+        document.getElementById("toolboxBaseImage").src = base.url;
         state.offset = 0;
         document.getElementById("gallery").innerHTML = "";
         initObserver();
         loadGallery();
       });
-      baseSelector.appendChild(thumb);
-    });
+    }
+
+    // Add "New Base" button inside a container for consistency
+    const newBaseContainer = document.createElement("div");
+    newBaseContainer.classList.add("base-thumb-container");
+
     const addNewThumb = document.createElement("div");
     addNewThumb.classList.add("base-thumb", "new-base-thumb");
     addNewThumb.innerHTML = "<span>+</span>";
+
     addNewThumb.addEventListener("click", () => {
       document.getElementById("baseUploadModal").style.display = "flex";
     });
-    baseSelector.appendChild(addNewThumb);
-    if (!state.selectedBase) {
+
+    newBaseContainer.appendChild(addNewThumb);
+    baseSelector.appendChild(newBaseContainer);
+
+    if (!state.selectedBase && baseList.length > 0) {
       state.selectedBase = baseList[0].baseId;
-      toolboxThumbnail.src = baseList[0].url;
-      toolboxBaseImage.src = baseList[0].url;
+      document.getElementById("toolboxThumbnail").src = baseList[0].url;
+      document.getElementById("toolboxBaseImage").src = baseList[0].url;
     }
   } catch (err) {
     console.error("Error loading base images:", err);
@@ -103,6 +118,12 @@ export function initBaseGallery() {
     e.preventDefault();
     const form = e.target;
     const formData = new FormData(form);
+
+    // Determine gallery type from toggle
+    const galleryTypeToggle = document.getElementById("galleryTypeToggle");
+    const galleryType = galleryTypeToggle.checked ? "character" : "ipa";
+    formData.set("galleryType", galleryType); // Use set() to overwrite any unintended values
+
     try {
       const response = await fetch("/uploadBase", { method: "POST", body: formData });
       const result = await response.json();

@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import sharp from "sharp";
 import { fileURLToPath } from "url";
-import { getGalleryDirs, getCompressedDir } from "../utils/galleryUtils.js";
+import { getGalleryDirs, getCompressedDir, galleriesDir } from "../utils/galleryUtils.js";
 import { getCachedFingerprint } from "../utils/imageProcessing.js";
 
 const router = express.Router();
@@ -48,7 +48,18 @@ router.get("/references/:baseId", async (req, res) => {
     });
     references.sort((a, b) => a - b);
     const paginated = references.slice(offset, offset + limit);
-    res.json({ references: paginated, total: references.length });
+
+    // Load gallery metadata to determine gallery type
+    let galleryType = "ipa";
+    try {
+      const metadataPath = path.join(galleriesDir, baseId, "metadata.json");
+      const metaRaw = await fsPromises.readFile(metadataPath, "utf8");
+      const meta = JSON.parse(metaRaw);
+      galleryType = meta.galleryType || "ipa";
+    } catch (err) {
+      console.log("Metadata not found, defaulting to IPA mode");
+    }
+    res.json({ references: paginated, total: references.length, galleryType });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Unable to read gallery images" });
@@ -65,6 +76,7 @@ router.get("/captions/:baseId/:id", async (req, res) => {
     await fsPromises.access(captionPath);
     const data = await fsPromises.readFile(captionPath, "utf8");
     res.send(data.trim());
+    console.log(`[DEBUG] GET /captions/${baseId}/${req.params.id} returned ${data.trim()}.`);
   } catch (err) {
     res.status(404).send("No caption available");
   }
@@ -77,12 +89,12 @@ router.get("/get-image/:baseId/:refNumber/:type", async (req, res) => {
   try {
     const { imagesDir } = getGalleryDirs(baseId);
     const compDir = getCompressedDir(baseId);
-    if (type === "ipa") {
-      const ipaFile = await findRefImage(baseId, refNumber);
-      if (!ipaFile) {
-        return res.status(404).json({ error: "IPA image not found" });
+    if (type === "ipa" || type === "character") {
+      const file = await findRefImage(baseId, refNumber);
+      if (!file) {
+        return res.status(404).json({ error: `${type} image not found` });
       }
-      return res.sendFile(path.join(imagesDir, ipaFile));
+      return res.sendFile(path.join(imagesDir, file));
     } else if (["style", "comp", "both"].includes(type)) {
       const compressedFileName = `${refNumber}-${type}.jpg`;
       const compressedPath = path.join(compDir, compressedFileName);
@@ -119,6 +131,7 @@ router.post(
     { name: "style", maxCount: 1 },
     { name: "comp", maxCount: 1 },
     { name: "both", maxCount: 1 },
+    { name: "character", maxCount: 1 },
   ]),
   async (req, res) => {
     const baseId = req.params.baseId;
@@ -135,40 +148,66 @@ router.post(
         }
       });
       const newId = maxId + 1;
-      // Save IPA image.
-      if (req.files.ipa && req.files.ipa[0]) {
-        const ipaFile = req.files.ipa[0];
-        if (!ipaFile.mimetype.startsWith("image/")) {
-          return res.status(400).json({ error: "Invalid file type for IPA image." });
+
+      // Load gallery metadata to determine gallery type
+      let galleryType = "ipa";
+      const metadataPath = path.join(galleriesDir, baseId, "metadata.json");
+      try {
+        const metaRaw = await fsPromises.readFile(metadataPath, "utf8");
+        const meta = JSON.parse(metaRaw);
+        galleryType = meta.galleryType || "ipa";
+      } catch (err) {
+        console.log("Metadata not found, defaulting to IPA mode");
+      }
+
+      if (galleryType === "character") {
+        // Process character upload (expecting field "character")
+        if (req.files.character && req.files.character[0]) {
+          const charFile = req.files.character[0];
+          if (!charFile.mimetype.startsWith("image/")) {
+            return res.status(400).json({ error: "Invalid file type for character image." });
+          }
+          const ext = path.extname(charFile.originalname) || ".jpg";
+          const charFilename = `${newId}${ext}`;
+          await fsPromises.writeFile(path.join(imagesDir, charFilename), charFile.buffer);
+        } else {
+          return res.status(400).json({ error: "Character image is required." });
         }
-        const ext = path.extname(ipaFile.originalname) || ".jpg";
-        const ipaFilename = `${newId}${ext}`;
-        await fsPromises.writeFile(path.join(imagesDir, ipaFilename), ipaFile.buffer);
       } else {
-        return res.status(400).json({ error: "IPA reference image is required." });
-      }
-      // Helper to save additional files.
-      async function saveOriginal(file, suffix) {
-        if (!file.mimetype.startsWith("image/")) {
-          throw new Error(`Invalid file type for ${suffix} image.`);
+        // IPA mode: process IPA, style, comp, both images.
+        if (req.files.ipa && req.files.ipa[0]) {
+          const ipaFile = req.files.ipa[0];
+          if (!ipaFile.mimetype.startsWith("image/")) {
+            return res.status(400).json({ error: "Invalid file type for IPA image." });
+          }
+          const ext = path.extname(ipaFile.originalname) || ".jpg";
+          const ipaFilename = `${newId}${ext}`;
+          await fsPromises.writeFile(path.join(imagesDir, ipaFilename), ipaFile.buffer);
+        } else {
+          return res.status(400).json({ error: "IPA reference image is required." });
         }
-        const filename = `${newId}-${suffix}.png`;
-        await fsPromises.writeFile(path.join(imagesDir, filename), file.buffer);
-      }
-      if (req.files.style && req.files.style[0]) {
-        await saveOriginal(req.files.style[0], "style");
-      } else {
-        return res.status(400).json({ error: "Style image is required." });
-      }
-      if (req.files.comp && req.files.comp[0]) {
-        await saveOriginal(req.files.comp[0], "comp");
-      } else {
-        return res.status(400).json({ error: "Comp image is required." });
-      }
-      if (req.files.both && req.files.both[0]) {
-        await saveOriginal(req.files.both[0], "both");
-      } else {
-        return res.status(400).json({ error: "Both image is required." });
+        async function saveOriginal(file, suffix) {
+          if (!file.mimetype.startsWith("image/")) {
+            throw new Error(`Invalid file type for ${suffix} image.`);
+          }
+          const filename = `${newId}-${suffix}.png`;
+          await fsPromises.writeFile(path.join(imagesDir, filename), file.buffer);
+        }
+        if (req.files.style && req.files.style[0]) {
+          await saveOriginal(req.files.style[0], "style");
+        } else {
+          return res.status(400).json({ error: "Style image is required." });
+        }
+        if (req.files.comp && req.files.comp[0]) {
+          await saveOriginal(req.files.comp[0], "comp");
+        } else {
+          return res.status(400).json({ error: "Comp image is required." });
+        }
+        if (req.files.both && req.files.both[0]) {
+          await saveOriginal(req.files.both[0], "both");
+        } else {
+          return res.status(400).json({ error: "Both image is required." });
+        }
       }
       // Save caption.
       const { captionsDir } = getGalleryDirs(baseId);

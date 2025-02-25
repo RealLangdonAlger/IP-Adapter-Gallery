@@ -56,6 +56,26 @@ Populating the gallery is done manually for now.
 - **Color Filtering:**  
   Filter gallery entries by a selected color. The integrated color picker in the Toolbox lets you choose a target color, and the system will display images whose style fingerprints are closest to that color—all while preserving infinite scroll functionality.
 
+## Gallery Types
+
+- **IPA Reference Gallery**
+
+  - Structured gallery supporting Style, Composition, and Both image variants.
+
+  - Includes similarity checks to prevent duplicate uploads.
+
+  - Supports color-based filtering for precise searches.
+
+- **Character Gallery**
+
+  - Flexible gallery for showcasing standalone character images.
+
+  - No grid layout—each image is treated as an individual entry.
+
+  - No similarity checks, focusing purely on image variety.
+
+  - Includes lightbox view, deletion, and quick-editing options.
+
 ## Usage
 
 1. **Viewing Galleries:**  

@@ -18,6 +18,9 @@ const __dirname = path.dirname(__filename);
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+ensureDir(baseImagesDir);
+ensureDir(galleriesDir);
+
 // GET /baseImages – auto-detect all base images.
 router.get("/baseImages", async (req, res) => {
   try {
